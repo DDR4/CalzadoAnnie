@@ -1,0 +1,261 @@
+﻿@using Microsoft.AspNet.Identity
+@{
+    ViewBag.Title = "Producto";
+}
+
+
+
+<section class="content-header">
+    <h1> Productos <small> Almacen  </small></h1>
+    @*<ol class="breadcrumb"> Control </ol>*@
+</section>
+<section class="content">
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">&nbsp;</h3>
+
+                    <div class="box-tools pull-right">
+                        @if (User.Identity.GetUserId().Equals("1"))
+                        {
+                            <button class="btn btn-success btn-sm-max" id="btnNuevaProducto"><span class="fa fa-plus-square"></span> Nueva Producto</button>
+                        }
+
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                            <i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="box-body ">
+                    <form id="form1">
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="cboTipoBusqueda">Tipo b&uacute;squeda</label>
+                                <select class="form-control input-sm" style="width:100%;" id="cboTipoBusqueda">
+                                    <option value="0">Todos</option>
+                                    <option value="1">C&oacute;digo</option>
+                                    <option value="2">Marca</option>
+                                    <option value="3">Estado</option>
+                                </select>
+                            </div>
+                            <div id="tipoCodigo" style="display:none;">
+                                <div class="form-group col-md-2">
+                                    <label for="txtCodigo">C&oacute;digo</label>
+                                    <input type="text" class="form-control input-sm" id="txtCodigo">
+                                </div>
+                            </div>
+                            <div id="tipoMarca" style="display:none;">
+                                <div class="form-group col-md-4">
+                                    <label for="txtMarca">Marca</label>
+                                    <input type="text" class="form-control input-sm" id="txtMarca">
+                                </div>
+                            </div>
+                            <div id="tipoEstado" style="display:none;">
+                                <div class="form-group col-md-2">
+                                    <label for="cboEstado">Estado</label>
+                                    <select class="form-control input-sm" id="cboEstado">
+                                        <option value="0" selected>Todos</option>
+                                        <option value="1">Activo</option>
+                                        <option value="2">Inactivo</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-md-1">
+                                <label for="btnBuscar"><font color="white">_</font></label>
+                                <button type="button" class="btn btn-primary btn-sm" id="btnBuscar">
+                                    <span class="glyphicon glyphicon-search"></span>&nbsp;&nbsp;Buscar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">&nbsp;</h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                            <i class="fa fa-minus"></i>
+                        </button>
+
+                    </div>
+                </div>
+                <div class="box-body ">
+                    <div class="table-responsive">
+                        <table id="tblListadoProductos" class="table table-bordered table-striped table-hover table-condensed" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th width="10%">C&oacute;digo Producto</th>
+                                    <th width="8%;">Stock</th>
+                                    <th width="10%;">Codigo Almac&eacute;n</th>
+                                    <th width="15%;">Marca</th>
+                                    <th width="15%;">Talla</th>
+                                    <th width="15%;">Talla Vendida</th>
+                                    <th width="10%;">Precio</th>
+                                    <th width="10%;">Estado</th>
+                                    <th width="20%;"></th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+
+<div class="modal fade" id="modalProducto" tabindex="-1" role="dialog" aria-labelledby="titleModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" aria-label="Close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="titleModalProducto">Agregar Producto</h4>
+            </div>
+            <div class="modal-body">
+                <form id="formModal" class="small" onkeypress="return event.keyCode != 13;">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="txtModalCodigo">C&oacute;digo Producto</label>
+                                <input class="form-control input-sm" type="text" id="txtModalCodigo" maxlength="20" />
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="txtModalMarca">Marca</label>
+                                <input class="form-control input-sm" type="text" id="txtModalMarca" maxlength="250" placeholder="" />
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="txtModalPrecio">Precio</label>
+                                <input class="form-control input-sm" type="text" id="txtModalPrecio" maxlength="50" value="0.00" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="txtModalStock">Stock</label>
+                                <input class="form-control input-sm" type="text" id="txtModalStock" maxlength="50" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="txtModalCodigoAlmacen">C&oacute;digo Almac&eacute;n</label>
+                                <input class="form-control input-sm" type="text" id="txtModalCodigoAlmacen" maxlength="50" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="cboModalTipoProducto">Tipo de Producto</label>
+                                <select class="form-control" id="cboModalTipoProducto">
+                                    <option value="0">Seleccionar</option>
+                                    <option value="1">Verano</option>
+                                    <option value="2">Invierno</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="cboModalEstado">Estado</label>
+                                <select class="form-control" id="cboModalEstado">
+                                    <option value="0">Seleccionar</option>
+                                    <option value="1">Activo</option>
+                                    <option value="2">Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="txtModalTalla">Talla</label>
+                                    <input class="form-control input-sm" type="text" id="txtModalTalla" maxlength="2" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="btnBuscar"><font color="white">_</font></label>
+                                    <button class="btn btn-success btn-sm" id="btnAgregarTalla">
+                                        <span class="fa fa-plus-square"></span>
+                                        &nbsp;&nbsp; Agregar Talla
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="table-responsive">
+                                    <table id="tblListadoTallas" class="table table-bordered table-striped table-hover table-condensed" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th width="8%">Nro Talla</th>
+                                                <th width="8%"></th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="display:none;">
+                        <label for="txtModalTallaVendida">Talla Vendida</label>
+                        <input class="form-control input-sm" type="text" id="txtModalTallaVendida" maxlength="50" />
+                    </div>
+
+
+
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger btn-sm" type="button" id="btnSaveProducto">Guardar</button>
+                <button class="btn btn-default btn-sm" type="button" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+@section scripts{
+    <script src="~/Content/js/Producto/producto.js"></script>
+}
