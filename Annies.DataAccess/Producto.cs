@@ -24,6 +24,8 @@ namespace Annies.DataAccess
                 parm.Add("@Stock_Prod", obj.Stock_Prod);
                 parm.Add("@Marca_Prod", obj.Marca_Prod);
                 parm.Add("@Estado", obj.Estado_Prod );
+                parm.Add("@NumPagina", obj.Operacion.Inicio);
+                parm.Add("@TamPagina", obj.Operacion.Fin);
 
                 var result = connection.Query(
                      sql: "SP_SCRUM_VENTAS",
@@ -44,8 +46,13 @@ namespace Annies.DataAccess
                          Estado_Prod = n.Single(d => d.Key.Equals("Estado_Prod")).Value.Parse<int>(),
                          Auditoria = new Auditoria
                          {
-                             TipoUsuario = obj.Auditoria.TipoUsuario
-                         }
+                             TipoUsuario = obj.Auditoria.TipoUsuario,
+                         },
+                         Operacion = new Operacion
+                         {
+                             TotalRows = n.Single(d => d.Key.Equals("TotalRows")).Value.Parse<int>(),
+                         },
+                        FechaDesde =  n.Single(d => d.Key.Equals("Fecha")).Value.Parse<int>(),
                      });
 
                 return result;
@@ -99,6 +106,39 @@ namespace Annies.DataAccess
             }
         }
 
+        public IEnumerable<Entities.Producto> GetAllProductos(Entities.Producto obj)
+        {
+            using (var connection = Factory.ConnectionFactory())
+            {
+                connection.Open();
+                var parm = new DynamicParameters();
+                parm.Add("@Cod_Prod", obj.Cod_Prod);
+                parm.Add("@Marca_Prod", obj.Marca_Prod);
+                parm.Add("@Estado", obj.Estado_Prod);
+                parm.Add("@FechaDesde", obj.FechaDesde);
+                parm.Add("@FechaHasta", obj.FechaHasta);
+
+                var result = connection.Query(
+                     sql: "SP_FILTRAR_PRODUCTO",
+                     param: parm,
+                     commandType: CommandType.StoredProcedure)
+                     .Select(m => m as IDictionary<string, object>)
+                     .Select(n => new Entities.Producto
+                     {
+                         Cod_Prod = n.Single(d => d.Key.Equals("Cod_Prod")).Value.Parse<int>(),
+                         Stock_Prod = n.Single(d => d.Key.Equals("Stock_Prod")).Value.Parse<int>(),
+                         Codigo_Al = n.Single(d => d.Key.Equals("Cod_Almacen")).Value.Parse<string>(),
+                         Marca_Prod = n.Single(d => d.Key.Equals("Marca_Prod")).Value.Parse<string>(),
+                         Talla_Prod = n.Single(d => d.Key.Equals("Talla_Prod")).Value.Parse<string>(),
+                         Talla_Vendida_Prod = n.Single(d => d.Key.Equals("Talla_Vendida_Prod")).Value.Parse<string>(),
+                         Precio_Prod = n.Single(d => d.Key.Equals("Precio_Prod")).Value.Parse<double>(),
+                         Estado_Prod = n.Single(d => d.Key.Equals("Estado_Prod")).Value.Parse<int>(),
+                         FechaDesde = n.Single(d => d.Key.Equals("Fecha")).Value.Parse<int>()
+                     });
+
+                return result;
+            }
+        }
 
 
 

@@ -37,6 +37,15 @@
     var $tblListadoProductos = $('#tblListadoProductos');
     var $btnSaveProducto = $('#btnSaveProducto');
 
+    var $cboTipoBusquedaModal = $('#cboTipoBusquedaModal');
+    var $txtCodigoModal = $('#txtCodigoModal');
+    var $txtMarcaModal = $('#txtMarcaModal');
+    var $btnBuscarModal = $('#btnBuscarModal');
+
+    var $btnGenerarExcel = $('#btnGenerarExcel');
+    var $txtFechaDesde = $('#txtFechaDesde');
+    var $txtFechaHasta = $('#txtFechaHasta');
+
     var Message = {
         ObtenerTipoBusqueda: "Obteniendo los tipos de busqueda, Por favor espere...",
         GuardarSuccess: "Los datos se guardaron satisfactoriamente",
@@ -49,6 +58,7 @@
     // Implementacion del constructor
     function Initialize() {
         $cboTipoBusqueda.change($cboTipoBusqueda_change);
+        $cboTipoBusquedaModal.change($cboTipoBusquedaModal_change);
         GetVentas();
         app.Event.Datepicker($txtFecha);
         app.Event.SetDateDatepicket($txtModalFecha);
@@ -58,11 +68,27 @@
         $btnProducto.click($btnProducto_click);
         $btnSaveProducto.click($btnSaveProducto_click);
         $btnSaveVenta.click($btnSaveVenta_click);
+        $btnBuscarModal.click($btnBuscarModal_click);
         $txtModalPrecioVenta.blur($txtModalPrecioVenta_keypress);
+
         //$cboModalTalla.select2();
         $cboModalTalla.change($cboModalTalla_change);
 
         app.Event.ForceDecimalOnly($txtModalPrecioVenta);
+
+        $btnGenerarExcel.click($btnGenerarExcel_click);
+        $txtFechaDesde.change(ValidarGenerarExcel);
+        $txtFechaHasta.change(ValidarGenerarExcel);
+        var date = new Date();
+        var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        $txtFechaHasta.datepicker({
+            endDate: "today",
+            todayHighlight: true
+        }).datepicker('setDate', today);
+        $txtFechaDesde.datepicker({
+            endDate: "today",
+            todayHighlight: true
+        });
     }
 
     function $cboTipoBusqueda_change() {
@@ -88,9 +114,29 @@
 
     }
 
-    function GetVentas() {
-        var obj = {
+    function $cboTipoBusquedaModal_change() {
 
+        var codSelec = $(this).val();
+        //$('#form1')[0].reset();
+        $('#tipoCodigoModal').hide();
+        $('#tipoMarcaModal').hide();
+
+        $txtCodigoModal.val("");
+        $txtMarcaModal.val("");
+
+        if (codSelec == "1") {
+            $('#tipoCodigoModal').show();
+        }
+        else if (codSelec == "2") {
+            $('#tipoMarcaModal').show();
+        }
+    }
+
+    function GetVentas() {
+
+        var url = "Ventas/GetVentas";
+
+        var parms = {
             Fecha: app.ConvertDatetimeToInt($txtFecha.val(), '/'),
             Talla_Venta: $txtTalla.val(),
             Producto: {
@@ -99,13 +145,76 @@
             }
 
         }
-        var method = "POST";
-        var url = "Ventas/GetVentas";
-        var data = obj;
-        var fnDoneCallback = function (data) {
-            FillTable(data, 1);
-        };
-        app.CallAjax(method, url, data, fnDoneCallback, null, null, null);
+        
+        var columns = [
+            { data: "Cod_Venta" },
+            { data: "Producto.Cod_Prod" },
+            { data: "Producto.Marca_Prod" },
+            { data: "Cant_Venta" },
+            { data: "Fecha" },
+            { data: "Precio_Final" },
+            { data: "Talla_Venta" },
+            { data: "Auditoria.TipoUsuario" }
+        ];
+        var columnDefs = [
+            {
+                "targets": [4],
+                'render': function (data, type, full, meta) {
+                    return '' + app.ConvertIntToDatetimeDT(data) + '';
+                }
+            },
+            {
+                "targets": [5],
+                "className": "text-right",
+                'render': function (data, type, full, meta) {
+                    return '' + app.FormatNumber(data) + '';
+                }
+            },
+            {
+                "targets": [7],
+                "visible": true,
+                "orderable": false,
+                "className": "text-center",
+                'render': function (data, type, full, meta) {
+                    if (data == 1) {
+                        return "<center>" +
+                            '<a class="btn btn-default btn-xs"  title="Eliminar" href="javascript:Ventas.EliminarVenta(' + meta.row + ')"><i class="fa fa-trash" aria-hidden="true"></i></a>' +
+                            "</center> ";
+                    } else {
+                        return "";
+                    }
+                }
+            }
+        ];
+
+        var buttons = [{
+            extend: 'excelHtml5',
+            className: 'btn btn-success btn-sm ',
+            customizeData: function (data) {
+                for (var i = 0; i < data.body.length; i++) {
+                    for (var j = 0; j < data.body[i].length; j++) {
+                        data.body[i][j] = '\u200C' + data.body[i][j];
+                    }
+                }
+            },
+
+        }];
+
+        var filters = {
+            pageLength: app.Defaults.TablasPageLength
+        }
+
+
+        app.FillDataTableAjaxPaging($tblListadoVentas, url, parms, columns, columnDefs, filters, null, null);
+    
+
+        //var method = "POST";
+        //var url = "Ventas/GetVentas";
+        //var data = obj;
+        //var fnDoneCallback = function (data) {
+        //    FillTable(data, 1);
+        //};
+        //app.CallAjax(method, url, data, fnDoneCallback, null, null, null);
     }
 
     function FillTable(data, tipo) {
@@ -320,17 +429,49 @@
     function $btnProducto_click() {
         $modalProducto.modal();
         $cboModalTalla.html("");
+        $cboTipoBusquedaModal.val(0).change();
         LoadProductos();
     }
 
     function LoadProductos() {
-        var method = "POST";
+
         var url = "Ventas/GetProducto";
-        var data = "";
-        var fnDoneCallback = function (data) {
-            FillTable(data, 2);
-        };
-        app.CallAjax(method, url, data, fnDoneCallback, null, null, null);
+        var parms = {
+            Cod_Prod: $txtCodigoModal.val().trim(),
+            Marca_Prod: $txtMarcaModal.val().trim(),
+        }
+        var columns = [
+            { data: "Cod_Prod" },
+            { data: "Stock_Prod" },
+            { data: "Codigo_Al" },
+            { data: "Marca_Prod" },
+            { data: "Talla_Prod" },
+            { data: "Talla_Vendida_Prod" },
+            { data: "Precio_Prod" },
+        ];
+        var columnDefs = [
+            {
+                "targets": [6],
+                "className": "text-right",
+                'render': function (data, type, full, meta) {
+                    return '' + app.FormatNumber(data) + '';
+                }
+            }
+        ];
+
+
+        app.FillDataTableAjaxPaging($tblListadoProductos, url, parms, columns, columnDefs, null, null, null);
+
+
+
+
+        //var method = "POST";
+        //var url = "Ventas/GetProducto";
+        //var data = "";
+        //var fnDoneCallback = function (data) {
+        //    FillTable(data, 2);
+        //};
+        //app.CallAjax(method, url, data, fnDoneCallback, null, null, null);
     }
 
     function $btnSaveProducto_click() {
@@ -419,6 +560,53 @@
 
         }
         app.Message.Confirm("Aviso", "Esta seguro que desea eliminar el registro?", "Aceptar", "Cancelar", fnAceptarCallback, null);
+    }
+
+    function $btnBuscarModal_click() {
+        LoadProductos();
+    }
+
+    function $btnGenerarExcel_click() {
+        var FechaDesde = app.ConvertDatetimeToInt($txtFechaDesde.val(), '/');
+        var FechaHasta = app.ConvertDatetimeToInt($txtFechaHasta.val(), '/');
+
+        if (FechaDesde !== "" && FechaHasta !== "") {
+            GenerarExcel();
+        } else if (FechaDesde === "") {
+            app.Message.Info("Aviso", "Falta ingresar la Fecha Desde", "Aceptar", null);
+        }
+
+    }
+
+    function GenerarExcel() {
+
+        var data = {
+            Producto: {
+                Cod_Prod: $txtCodigo.val(),
+                Marca_Prod: $txtMarca.val()
+            },
+            Talla_Venta: $txtTalla.val(),
+            FechaDesde: app.ConvertDatetimeToInt($txtFechaDesde.val(), '/'),
+            FechaHasta: app.ConvertDatetimeToInt($txtFechaHasta.val(), '/')
+        }
+
+        var fnDoneCallback = function (data) {
+            if (data.InternalStatus == 1 && data.Data.length > 0) {
+                app.RedirectTo("Ventas/GenerarExcel");
+            } else {
+                app.Message.Info("Aviso", "No hay ventas con esas fechas", "Aceptar");
+            }
+        }
+        app.CallAjax("POST", "Ventas/GetAllVentas", data, fnDoneCallback);
+    }
+
+    function ValidarGenerarExcel() {
+        var FechaDesde = app.ConvertDatetimeToInt($txtFechaDesde.val(), '/');
+        var FechaHasta = app.ConvertDatetimeToInt($txtFechaHasta.val(), '/');
+
+        if (FechaDesde > FechaHasta) {
+            $txtFechaDesde.val("");
+        }
     }
 
     return {

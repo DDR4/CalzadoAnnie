@@ -30,5 +30,19 @@ namespace Annies.Common
             }
             return default(string);
         }
+
+
+        public static Object ErrorCatchDataTable(Exception ex)
+        {
+            var response = (new
+            {
+                draw = 0,
+                recordsTotal = 0,
+                recordsFiltered = 0,
+                data = new object[0],
+                error = ex.Message
+            });
+            return response;
+        }
     }
 }

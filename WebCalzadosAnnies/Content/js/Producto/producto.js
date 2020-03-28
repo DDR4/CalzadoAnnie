@@ -33,6 +33,10 @@
     var $cboModalTipoProducto = $('#cboModalTipoProducto');
     var $cboModalEstado = $('#cboModalEstado');
 
+    var $btnGenerarExcel = $('#btnGenerarExcel');
+    var $txtFechaDesde = $('#txtFechaDesde');
+    var $txtFechaHasta = $('#txtFechaHasta');
+
     var Message = {
         ObtenerTipoBusqueda: "Obteniendo los tipos de busqueda, Por favor espere...",
         GuardarSuccess: "Los datos se guardaron satisfactoriamente",
@@ -60,7 +64,6 @@
         $btnAgregarTalla.click($btnAgregarTalla_click);
         GetProducto();
 
-
         app.Event.ForceNumericOnly($txtModalCodigo);
         app.Event.Number($txtModalStock);
         app.Event.ForceDecimalOnly($txtModalPrecio);
@@ -68,6 +71,22 @@
         app.Event.Number($txtCodigo);
 
         app.Event.Blur($txtModalPrecio, "N");
+
+       
+        $btnGenerarExcel.click($btnGenerarExcel_click);
+        $txtFechaDesde.change(ValidarGenerarExcel);
+        $txtFechaHasta.change(ValidarGenerarExcel);
+        var date = new Date();
+        var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        $txtFechaHasta.datepicker({
+            endDate: "today",
+            todayHighlight: true
+        }).datepicker('setDate', today);
+        $txtFechaDesde.datepicker({
+            endDate: "today",
+            todayHighlight: true
+        });
+               
     };
 
     function $cboTipoBusqueda_change() {
@@ -240,18 +259,106 @@
     }
 
     function GetProducto() {
-        var obj = {
+        var parms = {
             Cod_Prod: $txtCodigo.val(),
             Marca_Prod: $txtMarca.val(),
             Estado_Prod: $cboEstado.val()
         }
-        var method = "POST";
+
         var url = "Producto/GetProducto";
-        var data = obj;
-        var fnDoneCallback = function (data) {
-            FillTable(data);
+
+
+        var columns = [
+            { data: "Cod_Prod" },
+            { data: "Stock_Prod" },
+            { data: "Codigo_Al" },
+            { data: "Marca_Prod" },
+            { data: "Talla_Prod" },
+            { data: "Talla_Vendida_Prod" },
+            { data: "Precio_Prod" },
+            { data: "Estado_Prod" },
+            { data: "FechaDesde" },
+            { data: "Auditoria.TipoUsuario" },
+
+        ];
+        var columnDefs = [
+            {
+                "targets": [6],
+                "className": "text-right",
+                'render': function (data, type, full, meta) {
+                    return '' + app.FormatNumber(data) + '';
+                }
+            },
+            {
+                "targets": [7],
+                "className": "text-center",
+                'render': function (data, type, full, meta) {
+                    if (data == 1) {
+                        return "Activo";
+                    } else return "Inactivo";
+
+                }
+            },
+            {
+                "targets": [8],
+                'render': function (data, type, full, meta) {
+                    return '' + app.ConvertIntToDatetimeDT(data) + '';
+                }
+            },
+            {
+                "targets": [9],
+                "visible": true,
+                "orderable": false,
+                "className": "text-center",
+                'render': function (data, type, full, meta) {
+                    if (data == 1) {
+                        return "<center>" +
+                            '<a class="btn btn-default btn-xs" title="Editar" href="javascript:Producto.EditarProducto(' + meta.row + ');"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>' +
+                            '<a class="btn btn-default btn-xs"  title="Eliminar" href="javascript:Producto.EliminarProducto(' + meta.row + ')"><i class="fa fa-trash" aria-hidden="true"></i></a>' +
+                            "</center> ";
+                    } else {
+                        return "";
+                    }
+                }
+            },
+          
+        ];
+
+        var buttons = [{
+            extend: 'excelHtml5',
+            className: 'btn btn-success btn-sm ',
+            customizeData: function (data) {
+                //var second = [["d", "e", "f", "f", "f", "f", "f", "f", "f"]];
+                //$.merge(data.body, second)            
+
+                for (var i = 0; i < data.body.length; i++) {
+                    for (var j = 0; j < data.body[i].length; j++) {
+                        data.body[i][j] = '\u200C' + data.body[i][j];
+                    }
+                }
+
+                return data;
+            },
+
+        }];
+
+  
+        var filters = {
+            pageLength: app.Defaults.TablasPageLength,
+            //lengthChange: true,
+            //lengthMenu: [[10, 25, 50, 2438], [10, 25, 50, "All"]]
         };
-        app.CallAjax(method, url, data, fnDoneCallback, null, null, null);
+
+
+        app.FillDataTableAjaxPaging($tblListadoProductos, url, parms, columns, columnDefs, filters, null, null);
+
+
+        //var method = "POST";
+        //var data = obj;
+        //var fnDoneCallback = function (data) {
+        //    FillTable(data);
+        //};
+        //app.CallAjax(method, url, data, fnDoneCallback, null, null, null);
     }
 
     function FillTable(data) {
@@ -319,7 +426,7 @@
 
 
 
-        app.FillDataTable($tblListadoProductos, data, columns, columnDefs, "#tblListadoProductos", false, null, null, null, null, null , 1);
+        app.FillDataTable($tblListadoProductos, data, columns, columnDefs, "#tblListadoProductos", false, null, null, null, null, null, 1);
     }
 
     function EditarProducto(row) {
@@ -431,6 +538,46 @@
     }
 
 
+    function $btnGenerarExcel_click() {
+        var FechaDesde = app.ConvertDatetimeToInt($txtFechaDesde.val(), '/');
+        var FechaHasta = app.ConvertDatetimeToInt($txtFechaHasta.val(), '/');
+
+        if (FechaDesde !== "" && FechaHasta !== "") {
+            GenerarExcel();
+        } else if (FechaDesde === "") {
+            app.Message.Info("Aviso", "Falta ingresar la Fecha Desde", "Aceptar", null);
+        } 
+       
+    }
+    
+    function GenerarExcel() {
+
+        var data = {
+            Cod_Prod: $txtCodigo.val(),
+            Marca_Prod: $txtMarca.val(),
+            Estado_Prod: $cboEstado.val(),
+            FechaDesde : app.ConvertDatetimeToInt($txtFechaDesde.val(), '/'),
+            FechaHasta : app.ConvertDatetimeToInt($txtFechaHasta.val(), '/')     
+        }
+
+        var fnDoneCallback = function (data) {
+            if (data.InternalStatus == 1 && data.Data.length > 0) {
+                app.RedirectTo("Producto/GenerarExcel");
+            } else {
+                app.Message.Info("Aviso", "No hay productos con esas fechas", "Aceptar");
+            } 
+        }
+        app.CallAjax("POST", "Producto/GetAllProductos", data, fnDoneCallback);
+    }
+
+    function ValidarGenerarExcel() {
+        var FechaDesde = app.ConvertDatetimeToInt($txtFechaDesde.val(), '/');
+        var FechaHasta = app.ConvertDatetimeToInt($txtFechaHasta.val(), '/');     
+        
+        if (FechaDesde > FechaHasta) {
+            $txtFechaDesde.val("");
+        }
+    }
 
 
     return {

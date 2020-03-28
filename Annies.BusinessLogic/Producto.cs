@@ -17,22 +17,20 @@ namespace Annies.BusinessLogic
             repository = new DataAccess.Producto();
         }
 
-        public Response<IEnumerable<Entities.Producto>> GetProducto(Entities.Producto obj  )
+        public Response<IEnumerable<Entities.Producto>> GetProducto(Entities.Producto obj)
         {
             try
             {
-                obj.Operacion = new Operacion
-                {
-                    TipoOperacion = "P",
-                    Opcion = "S",
-                };
+
+                obj.Operacion.TipoOperacion = "P";
+                obj.Operacion.Opcion = "S";
 
                 var result = repository.GetProducto(obj);
                 return new Response<IEnumerable<Entities.Producto>>(result);
             }
             catch (Exception ex)
             {
-                return new Response<IEnumerable<Entities.Producto>>(ex);
+                throw new Exception(ex.Message);
             }
         }
 
@@ -40,7 +38,7 @@ namespace Annies.BusinessLogic
         {
             try
             {
-        
+
                 var result = repository.InsertUpdateProducto(obj);
                 return new Response<int>(result);
             }
@@ -66,6 +64,19 @@ namespace Annies.BusinessLogic
             catch (Exception ex)
             {
                 return new Response<int>(ex);
+            }
+        }
+
+        public Response<IEnumerable<Entities.Producto>> GetAllProductos(Entities.Producto obj)
+        {
+            try
+            {
+                var result = repository.GetAllProductos(obj);
+                return new Response<IEnumerable<Entities.Producto>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

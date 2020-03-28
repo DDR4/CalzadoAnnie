@@ -11,5 +11,9 @@ namespace Annies.Entities
         public string TipoOperacion { get; set; }
         public string Opcion { get; set; }
 
+        public int Inicio { get; set; }
+        public int Fin { get; set; }
+        public int TotalRows { get; set; }
+
     }
 }

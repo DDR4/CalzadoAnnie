@@ -20,6 +20,8 @@ namespace Annies.Entities
         public int Estado_Prod { get; set; }
         public Operacion Operacion { get; set; }
         public Auditoria Auditoria { get; set; }
+        public int? FechaDesde { get; set; }
+        public int? FechaHasta { get; set; }
 
     }
 }

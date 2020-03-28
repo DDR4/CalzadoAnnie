@@ -33,14 +33,15 @@
             }
         };
         var DataTablePaging = false;
-        var DataTableSearching = true;
+        var DataTableSearching = false;
         var DataTableOrdering = false;
         var DataTableSelect = {
             Single: "single",
             Multiple: 'multi'
         };
-        var DataTableLengthChange = true;
+        var DataTableLengthChange = false;
         var DataTablePageLength = 20;
+        var TablasPageLength = 100;
         // Configuracion general select2
         var Select2AllowClear = true;
         var Select2Style = {
@@ -60,6 +61,15 @@
         var ModalKeyboard = false;
         var ModalBackdrop = "static";
 
+        var datatableError = {
+            "draw": 0,
+            "recordsTotal": 0,
+            "recordsFiltered": 0,
+            "data": [0],
+            "error": ""
+        }
+
+
         return {
             DataTableLanguage: DataTableLanguage,
             DataTablePaging: DataTablePaging,
@@ -75,7 +85,10 @@
             DatePickerFormat: DatePickerFormat,
             DatePickerAutoclose: DatePickerAutoclose,
             ModalKeyboard: ModalKeyboard,
-            ModalBackdrop: ModalBackdrop
+            ModalBackdrop: ModalBackdrop,
+            datatableError: datatableError,
+            TablasPageLength: TablasPageLength
+
         };
     })($, win, doc);
 
@@ -437,8 +450,6 @@
         if ($.fn.dataTable.isDataTable(tableName)) {
             table = selector.dataTable().api();
         } else {
-            console.log(buttons);
-
             if (filtros) {
                 table = selector.dataTable({
                     paging: app.Defaults.DataTablePaging,
@@ -528,6 +539,77 @@
         if (data != null && indexRow != null) {
             var rwX = table.row(indexRow).node();
             $(rwX).addClass("selected");
+        }
+    }
+
+    function FillDataTableAjaxPaging(selector, url, params, columns, columnDefs, filters, rowCallback, buttons) {
+        var u = app.BaseSiteUrl + url;
+
+        var searching = !isNullUndefined(filters) && !isNullUndefined(filters.searching) ? filters.searching : app.Defaults.DataTableSearching;
+        var ordering = !isNullUndefined(filters) && !isNullUndefined(filters.ordering) ? filters.ordering : app.Defaults.DataTableOrdering;
+        var pageLength = !isNullUndefined(filters) && !isNullUndefined(filters.pageLength) ? filters.pageLength : app.Defaults.DataTablePageLength;
+        var lengthChange = !isNullUndefined(filters) && !isNullUndefined(filters.lengthChange) ? filters.lengthChange : app.Defaults.DataTableLengthChange;
+        var style = !isNullUndefined(filters) && !isNullUndefined(filters.select) ? filters.select : app.Defaults.DataTableSelect.Single;
+        var lenghMenu = !isNullUndefined(filters) && !isNullUndefined(filters.lengthMenu) ? filters.lengthMenu : [];
+
+        selector.dataTable({
+            "destroy": true,
+            "processing": true,
+            "responsive": true,
+            "serverSide": true,
+            "filter": false,
+            "orderMulti": false,
+            "paging": true,
+            "searching": searching,
+            "ordering": ordering,
+            "pageLength": pageLength,
+            "lengthChange": lengthChange,
+            "lengthMenu": lenghMenu,
+            "select": {
+                "style": style,
+            },
+            "language": app.Defaults.DataTableLanguage,
+            "ajax":
+            {
+                "url": u,
+                "dataType": "JSON",
+                "type": "POST",
+                "data": function (d) {
+                    return $.extend({}, d, params);
+                },
+                "dataFilter": function (data) {
+                    try {
+                        var json = jQuery.parseJSON(data);
+                        if (json.error != "" && json.error != undefined) {
+                            var message = "<h4>Se ha producido un error inesperado al procesar su solicitud.</h4>";
+                            message = message + "Descripcion del error: <br />" + json.error;
+                            Error.Show(message);
+                        }
+                        return JSON.stringify(json);
+                    } catch (e) {
+
+                        var error = app.Defaults.datatableError.error = e;
+                        $mainContent.html(data);
+                        return JSON.stringify(error);
+                    }
+                }
+            },
+            "columns": columns,
+            "columnDefs": columnDefs,
+            "rowCallback": rowCallback,
+            "dom": 'Bfrtip',
+            "buttons": buttons == undefined || buttons == null ? [] : buttons,
+
+        }).api();
+
+
+    }
+
+    function isNullUndefined(value) {
+        if (typeof value === "undefined" || value === null) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -789,7 +871,8 @@
         ToSplit: ToSplit,
         FillDataTableFiltros: FillDataTableFiltros,
         GetDataOfDataTable: GetDataOfDataTable,
-        ConvertIntToDatetimeDT: ConvertIntToDatetimeDT
+        ConvertIntToDatetimeDT: ConvertIntToDatetimeDT,
+        FillDataTableAjaxPaging: FillDataTableAjaxPaging
     };
 
 

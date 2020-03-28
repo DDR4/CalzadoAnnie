@@ -19,10 +19,8 @@
                     <h3 class="box-title">&nbsp;</h3>
 
                     <div class="box-tools pull-right">
-                        @if (User.Identity.GetUserId().Equals("1"))
-                        {
-                            <button class="btn btn-success btn-sm-max" id="btnNuevaVenta" data-toggle="modal" data-target="#modalVenta">Nueva Venta</button>
-                        }
+
+                        <button class="btn btn-success btn-sm-max" id="btnNuevaVenta" data-toggle="modal" data-target="#modalVenta">Nueva Venta</button>
 
                         <button type="button" class="btn btn-box-tool" data-widget="collapse">
                             <i class="fa fa-minus"></i>
@@ -99,6 +97,22 @@
                     </div>
                 </div>
                 <div class="box-body ">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <br />
+                            <button type="button" class="btn btn-success btn-sm" id="btnGenerarExcel"><i class="fa  fa-download" aria-hidden="true"></i> Exportar Excel</button>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="txtFechaDesde">Fecha Desde</label>
+                            <input class="form-control input-sm" type="text" id="txtFechaDesde" readonly="readonly" />
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="txtFechaHasta">Fecha Hasta</label>
+                            <input class="form-control input-sm" type="text" id="txtFechaHasta" readonly="readonly" />
+                        </div>
+                    </div>
+                    <br />
                     <div class="table-responsive">
                         <table id="tblListadoVentas" class="table table-bordered table-hover dataTable" style="width:100%;">
                             <thead>
@@ -235,20 +249,55 @@
                 <h4 class="modal-title" id="titleModalVenta">Producto</h4>
             </div>
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table id="tblListadoProductos" class="table table-bordered table-striped table-hover table-condensed" style="width:100%;">
-                        <thead>
-                            <tr>
-                                <th width="8%">C&oacute;digo</th>
-                                <th width="8%;">Stock</th>
-                                <th width="10%;">C&oacute;digo Almac&eacute;n</th>
-                                <th width="25%;">Marca</th>
-                                <th width="15%;">Talla</th>
-                                <th width="15%;">Talla Vendida</th>
-                                <th width="10%;">Precio</th>
-                            </tr>
-                        </thead>
-                    </table>
+                <div class="form-row">
+
+                    <div class="form-group col-md-4">
+                        <label for="cboTipoBusquedaModal">Tipo b&uacute;squeda</label>
+                        <select class="form-control input-sm" style="width:100%;" id="cboTipoBusquedaModal">
+                            <option value="0">Todos</option>
+                            <option value="1">C&oacute;digo</option>
+                            <option value="2">Marca</option>
+                        </select>
+                    </div>
+                    <div id="tipoCodigoModal" style="display:none;">
+                        <div class="form-group col-md-2">
+                            <label for="txtCodigoModal">C&oacute;digo</label>
+                            <input type="text" class="form-control input-sm" id="txtCodigoModal">
+                        </div>
+                    </div>
+                    <div id="tipoMarcaModal" style="display:none;">
+                        <div class="form-group col-md-4">
+                            <label for="txtMarcaModal">Marca</label>
+                            <input type="text" class="form-control input-sm" id="txtMarcaModal">
+                        </div>
+                    </div>
+
+                    <div class="form-group col-md-1">
+                        <label for="btnBuscarModal"><font color="white">_</font></label>
+                        <button type="button" class="btn btn-primary btn-sm" id="btnBuscarModal">
+                            <span class="glyphicon glyphicon-search"></span>&nbsp;&nbsp;Buscar
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table id="tblListadoProductos" class="table table-bordered table-striped table-hover table-condensed" style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th width="8%">C&oacute;digo</th>
+                                        <th width="8%;">Stock</th>
+                                        <th width="10%;">C&oacute;digo Almac&eacute;n</th>
+                                        <th width="25%;">Marca</th>
+                                        <th width="15%;">Talla</th>
+                                        <th width="15%;">Talla Vendida</th>
+                                        <th width="10%;">Precio</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

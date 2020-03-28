@@ -21,11 +21,9 @@ namespace Annies.BusinessLogic
         {
             try
             {
-                obj.Operacion = new Operacion
-                {
-                    TipoOperacion = "V",
-                    Opcion = "S"
-                };
+                obj.Operacion.TipoOperacion = "V";
+                obj.Operacion.Opcion = "S";
+             
                 obj.Producto.Cod_Prod = (obj.Producto.Cod_Prod == 0) ? null : obj.Producto.Cod_Prod;
                 obj.Fecha = (obj.Fecha == 0) ? null : obj.Fecha;
                 var result = repository.GetVentas(obj);                            
@@ -33,7 +31,7 @@ namespace Annies.BusinessLogic
             }
             catch (Exception ex)
             {
-                return new Response<IEnumerable<Entities.Ventas>>(ex);
+                throw new Exception(ex.Message);
             }
         }
 
@@ -60,6 +58,19 @@ namespace Annies.BusinessLogic
             catch (Exception ex)
             {
                 return new Response<int>(ex);
+            }
+        }
+
+        public Response<IEnumerable<Entities.Ventas>> GetAllVentas(Entities.Ventas obj)
+        {
+            try
+            {
+                var result = repository.GetAllVentas(obj);
+                return new Response<IEnumerable<Entities.Ventas>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

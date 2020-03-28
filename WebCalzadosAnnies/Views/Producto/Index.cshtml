@@ -94,22 +94,44 @@
                     </div>
                 </div>
                 <div class="box-body ">
-                    <div class="table-responsive">
-                        <table id="tblListadoProductos" class="table table-bordered table-striped table-hover table-condensed" style="width:100%;">
-                            <thead>
-                                <tr>
-                                    <th width="10%">C&oacute;digo Producto</th>
-                                    <th width="8%;">Stock</th>
-                                    <th width="10%;">Codigo Almac&eacute;n</th>
-                                    <th width="15%;">Marca</th>
-                                    <th width="15%;">Talla</th>
-                                    <th width="15%;">Talla Vendida</th>
-                                    <th width="10%;">Precio</th>
-                                    <th width="10%;">Estado</th>
-                                    <th width="20%;"></th>
-                                </tr>
-                            </thead>
-                        </table>
+
+                    <div class="row">
+                        <div class="col-md-2">
+                            <br />
+                            <button type="button" class="btn btn-success btn-sm" id="btnGenerarExcel"><i class="fa  fa-download" aria-hidden="true"></i> Exportar Excel</button>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="txtFechaDesde">Fecha Desde</label>
+                            <input class="form-control input-sm" type="text" id="txtFechaDesde" readonly="readonly" />
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="txtFechaHasta">Fecha Hasta</label>
+                            <input class="form-control input-sm" type="text" id="txtFechaHasta" readonly="readonly" />
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table id="tblListadoProductos" class="table table-bordered table-striped table-hover table-condensed" style="width:100%;">
+                                    <thead>
+                                        <tr>
+                                            <th width="10%">C&oacute;digo Producto</th>
+                                            <th width="5%;">Stock</th>
+                                            <th width="10%;">Codigo Almac&eacute;n</th>
+                                            <th width="15%;">Marca</th>
+                                            <th width="15%;">Talla</th>
+                                            <th width="10%;">Talla Vendida</th>
+                                            <th width="10%;">Precio</th>
+                                            <th width="10%;">Estado</th>
+                                            <th width="8%;">Fecha</th>
+                                            <th width="15%;"></th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

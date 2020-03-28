@@ -18,5 +18,7 @@ namespace Annies.Entities
         public Operacion Operacion { get; set; }
         public Auditoria Auditoria { get; set; }
         public Producto Producto { get; set; }
+        public int? FechaDesde { get; set; }
+        public int? FechaHasta { get; set; }
     }
 }

@@ -23,6 +23,8 @@ namespace Annies.DataAccess
                 parm.Add("@FECHA", obj.Fecha);
                 parm.Add("@Marca_Prod", obj.Producto.Marca_Prod);
                 parm.Add("@Talla_Prod", obj.Talla_Venta);
+                parm.Add("@NumPagina", obj.Operacion.Inicio);
+                parm.Add("@TamPagina", obj.Operacion.Fin);
 
                 var result = connection.Query(
                      sql: "SP_SCRUM_VENTAS",
@@ -44,6 +46,10 @@ namespace Annies.DataAccess
                          Auditoria = new Entities.Auditoria
                          {
                              TipoUsuario = obj.Auditoria.TipoUsuario
+                         },
+                         Operacion = new Entities.Operacion
+                         {
+                             TotalRows = n.Single(d=> d.Key.Equals("TotalRows")).Value.Parse<int>()
                          }
                      });
 
@@ -99,6 +105,41 @@ namespace Annies.DataAccess
             }
         }
 
+        public IEnumerable<Entities.Ventas> GetAllVentas(Entities.Ventas obj)
+        {
+            using (var connection = Factory.ConnectionFactory())
+            {
+                connection.Open();
+                var parm = new DynamicParameters();
+                parm.Add("@Cod_Prod", obj.Producto.Cod_Prod);
+                parm.Add("@Marca_Prod", obj.Producto.Marca_Prod);
+                parm.Add("@Talla_Venta", obj.Talla_Venta);
+                parm.Add("@FechaDesde", obj.FechaDesde);
+                parm.Add("@FechaHasta", obj.FechaHasta);
+
+                var result = connection.Query(
+                     sql: "SP_FILTRAR_VENTA",
+                     param: parm,
+                     commandType: CommandType.StoredProcedure)
+                     .Select(m => m as IDictionary<string, object>)
+                          .Select(n => new Entities.Ventas
+                          {
+                              Cod_Venta = n.Single(d => d.Key.Equals("Cod_Venta")).Value.Parse<int>(),
+                              Producto = new Annies.Entities.Producto
+                              {
+                                  Cod_Prod = n.Single(d => d.Key.Equals("Cod_Prod")).Value.Parse<int>(),
+                                  Marca_Prod = n.Single(d => d.Key.Equals("Marca_Prod")).Value.Parse<string>(),
+                              },
+                              Cant_Venta = n.Single(d => d.Key.Equals("Cant_Venta")).Value.Parse<int>(),
+                              Fecha = n.Single(d => d.Key.Equals("Fecha")).Value.Parse<int>(),
+                              Precio_Final = n.Single(d => d.Key.Equals("Precio_Final")).Value.Parse<int>(),
+                              Talla_Venta = n.Single(d => d.Key.Equals("Talla_Venta")).Value.Parse<string>()                          
+                         
+                          });
+
+                return result;
+            }
+        }
 
     }
 }
