@@ -16,18 +16,16 @@ namespace Annies.DataAccess
             using (var connection = Factory.ConnectionFactory())
             {
                 connection.Open();
-                var parm = new DynamicParameters();
-                parm.Add("@Tipo_Opc", obj.Operacion.TipoOperacion);
-                parm.Add("@Opc", obj.Operacion.Opcion);
+                var parm = new DynamicParameters();                
                 parm.Add("@Cod_Prod", obj.Producto.Cod_Prod);
                 parm.Add("@FECHA", obj.Fecha);
-                parm.Add("@Marca_Prod", obj.Producto.Marca_Prod);
-                parm.Add("@Talla_Prod", obj.Talla_Venta);
+                parm.Add("@Talla_Venta", obj.Talla_Venta);
+                parm.Add("@Marca_Prod", obj.Producto.Marca_Prod);               
                 parm.Add("@NumPagina", obj.Operacion.Inicio);
                 parm.Add("@TamPagina", obj.Operacion.Fin);
 
                 var result = connection.Query(
-                     sql: "SP_SCRUM_VENTAS",
+                     sql: "SP_BUSCAR_VENTA",
                      param: parm,
                      commandType: CommandType.StoredProcedure)
                      .Select(m => m as IDictionary<string, object>)
@@ -39,6 +37,7 @@ namespace Annies.DataAccess
                              Cod_Prod = n.Single(d => d.Key.Equals("Cod_Prod")).Value.Parse<int>(),
                              Marca_Prod = n.Single(d => d.Key.Equals("Marca_Prod")).Value.Parse<string>(),
                          },
+                         Precio_Venta = n.Single(d => d.Key.Equals("Precio_Venta")).Value.Parse<int>(),
                          Precio_Final = n.Single(d => d.Key.Equals("Precio_Final")).Value.Parse<int>(),
                          Talla_Venta = n.Single(d => d.Key.Equals("Talla_Venta")).Value.Parse<string>(),
                          Cant_Venta = n.Single(d => d.Key.Equals("Cant_Venta")).Value.Parse<int>(),
@@ -64,20 +63,16 @@ namespace Annies.DataAccess
             {
                 connection.Open();
                 var parm = new DynamicParameters();
-                parm.Add("@FECHA", obj.Fecha);
-                parm.Add("@Usuario", obj.Auditoria.UsuarioCreacion);
-                parm.Add("@Marca_Prod", obj.Producto.Marca_Prod);
-                parm.Add("@Precio_Prod", obj.Producto.Precio_Prod);
                 parm.Add("@Cod_Prod", obj.Producto.Cod_Prod);
-                parm.Add("@Descuento_Venta", obj.Descuento_Venta);
-                parm.Add("@Precio_Venta", obj.Precio_Venta);
-                parm.Add("@Cant_Venta", obj.Cant_Venta);
                 parm.Add("@Talla_Venta", obj.Talla_Venta);
-                parm.Add("@Tipo_Opc", obj.Operacion.TipoOperacion);
-                parm.Add("@Opc", obj.Operacion.Opcion);
+                parm.Add("@Cant_Venta", obj.Cant_Venta);
+                parm.Add("@Descuento_Venta", obj.Descuento_Venta);
+                parm.Add("@Precio_Venta", obj.Producto.Precio_Prod);
+                parm.Add("@FECHA", obj.Fecha);
+                parm.Add("@Usuario", obj.Auditoria.UsuarioCreacion);           
 
                 var result = connection.Execute(
-                    sql: "SP_SCRUM_VENTAS",
+                    sql: "SP_INSERTAR_VENTA",
                     param: parm,
                     commandType: CommandType.StoredProcedure);
 
@@ -93,11 +88,10 @@ namespace Annies.DataAccess
                 connection.Open();
                 var parm = new DynamicParameters();
                 parm.Add("@Cod_Venta", obj.Cod_Venta);
-                parm.Add("@Tipo_Opc", obj.Operacion.TipoOperacion);
-                parm.Add("@Opc", obj.Operacion.Opcion);
+                parm.Add("@Usuario", obj.Auditoria.UsuarioModificacion);
 
                 var result = connection.Execute(
-                    sql: "SP_SCRUM_VENTAS",
+                    sql: "SP_ELIMINAR_VENTA",
                     param: parm,
                     commandType: CommandType.StoredProcedure);
 
@@ -132,6 +126,7 @@ namespace Annies.DataAccess
                               },
                               Cant_Venta = n.Single(d => d.Key.Equals("Cant_Venta")).Value.Parse<int>(),
                               Fecha = n.Single(d => d.Key.Equals("Fecha")).Value.Parse<int>(),
+                              Precio_Venta = n.Single(d => d.Key.Equals("Precio_Venta")).Value.Parse<int>(),
                               Precio_Final = n.Single(d => d.Key.Equals("Precio_Final")).Value.Parse<int>(),
                               Talla_Venta = n.Single(d => d.Key.Equals("Talla_Venta")).Value.Parse<string>()                          
                          

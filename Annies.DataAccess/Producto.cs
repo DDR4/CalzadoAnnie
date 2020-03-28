@@ -18,17 +18,14 @@ namespace Annies.DataAccess
             {
                 connection.Open();
                 var parm = new DynamicParameters();
-                parm.Add("@Tipo_Opc", obj.Operacion.TipoOperacion);
-                parm.Add("@Opc", obj.Operacion.Opcion);
                 parm.Add("@Cod_Prod", obj.Cod_Prod);
-                parm.Add("@Stock_Prod", obj.Stock_Prod);
                 parm.Add("@Marca_Prod", obj.Marca_Prod);
+                parm.Add("@Stock_Prod", obj.Stock_Prod);
                 parm.Add("@Estado", obj.Estado_Prod );
                 parm.Add("@NumPagina", obj.Operacion.Inicio);
                 parm.Add("@TamPagina", obj.Operacion.Fin);
-
                 var result = connection.Query(
-                     sql: "SP_SCRUM_VENTAS",
+                     sql: "SP_BUSCAR_PRODUCTO",
                      param: parm,
                      commandType: CommandType.StoredProcedure)
                      .Select(m => m as IDictionary<string, object>)
@@ -36,8 +33,9 @@ namespace Annies.DataAccess
                      {
                          Cod_Prod = n.Single(d => d.Key.Equals("Cod_Prod")).Value.Parse<int>(),
                          Marca_Prod = n.Single(d => d.Key.Equals("Marca_Prod")).Value.Parse<string>(),
-                         Talla_Prod = n.Single(d => d.Key.Equals("Talla_Prod")).Value.Parse<string>(),
                          Precio_Prod = n.Single(d => d.Key.Equals("Precio_Prod")).Value.Parse<double>(),
+                         Precio_Prod_Mayor = n.Single(d => d.Key.Equals("Precio_Prod_Mayor")).Value.Parse<double>(),
+                         Talla_Prod = n.Single(d => d.Key.Equals("Talla_Prod")).Value.Parse<string>(),
                          Talla_Vendida_Prod = n.Single(d => d.Key.Equals("Talla_Vendida_Prod")).Value.Parse<string>(),
                          Stock_Prod = n.Single(d => d.Key.Equals("Stock_Prod")).Value.Parse<int>(),
                          Tipo_Prod = n.Single(d => d.Key.Equals("Tipo_Prod")).Value.Parse<int>(),
@@ -66,19 +64,18 @@ namespace Annies.DataAccess
             {
                 connection.Open();
                 var parm = new DynamicParameters();
-                parm.Add("@Tipo_Opc", obj.Operacion.TipoOperacion);
-                parm.Add("@Opc", obj.Operacion.Opcion);
+                parm.Add("@IdProducto", obj.IdProducto);
                 parm.Add("@Cod_Prod", obj.Cod_Prod);
                 parm.Add("@Cod_Almacen", obj.Codigo_Al);
                 parm.Add("@Marca_Prod", obj.Marca_Prod);
                 parm.Add("@Precio_Prod", obj.Precio_Prod);
-                parm.Add("@Talla_Prod", obj.Talla_Prod);
-                parm.Add("@Stock_Prod", obj.Stock_Prod);
+                parm.Add("@Precio_Prod_Mayor", obj.Precio_Prod_Mayor);
                 parm.Add("@Tipo_Prod", obj.Tipo_Prod);
                 parm.Add("@Usuario", obj.Auditoria.UsuarioCreacion);
                 parm.Add("@Estado", obj.Estado_Prod);
+                parm.Add("@Talla_Prod", obj.TallasXml);                
                 var result = connection.Execute(
-                    sql: "SP_SCRUM_VENTAS",
+                    sql: "SP_INSERTAR_PRODUCTO",
                     param: parm,
                     commandType: CommandType.StoredProcedure);
 
@@ -93,12 +90,10 @@ namespace Annies.DataAccess
             {
                 connection.Open();
                 var parm = new DynamicParameters();
-                parm.Add("@Tipo_Opc", obj.Operacion.TipoOperacion);
-                parm.Add("@Opc", obj.Operacion.Opcion);
                 parm.Add("@Cod_Prod", obj.Cod_Prod);
-
+                parm.Add("@Usuario", obj.Auditoria.UsuarioModificacion);
                 var result = connection.Execute(
-                    sql: "SP_SCRUM_VENTAS",
+                    sql: "SP_ELIMINAR_PRODUCTO",
                     param: parm,
                     commandType: CommandType.StoredProcedure);
 
@@ -132,6 +127,7 @@ namespace Annies.DataAccess
                          Talla_Prod = n.Single(d => d.Key.Equals("Talla_Prod")).Value.Parse<string>(),
                          Talla_Vendida_Prod = n.Single(d => d.Key.Equals("Talla_Vendida_Prod")).Value.Parse<string>(),
                          Precio_Prod = n.Single(d => d.Key.Equals("Precio_Prod")).Value.Parse<double>(),
+                         Precio_Prod_Mayor = n.Single(d => d.Key.Equals("Precio_Prod_Mayor")).Value.Parse<double>(),
                          Estado_Prod = n.Single(d => d.Key.Equals("Estado_Prod")).Value.Parse<int>(),
                          FechaDesde = n.Single(d => d.Key.Equals("Fecha")).Value.Parse<int>()
                      });
@@ -140,7 +136,72 @@ namespace Annies.DataAccess
             }
         }
 
+        public IEnumerable<Entities.Tallas> TallasProducto(string cod_prod)
+        {
+            using (var connection = Factory.ConnectionFactory())
+            {
+                connection.Open();
+                var parm = new DynamicParameters();
+                parm.Add("@Cod_Prod", cod_prod);
 
+                var result = connection.Query(
+                     sql: "SP_TALLAS_PRODUCTO",
+                     param: parm,
+                     commandType: CommandType.StoredProcedure)
+                     .Select(m => m as IDictionary<string, object>)
+                     .Select(n => new Entities.Tallas
+                     {
+                         Talla = n.Single(d => d.Key.Equals("Talla")).Value.Parse<int>(),
+                         CodigoProducto = n.Single(d => d.Key.Equals("Cod_Prod")).Value.Parse<int>(),
+                         Cantidad = n.Single(d => d.Key.Equals("Cantidad")).Value.Parse<int>()
+                     });
+
+                return result;
+            }
+        }
+
+        public IEnumerable<Entities.Tallas> TallasVenta(string cod_prod)
+        {
+            using (var connection = Factory.ConnectionFactory())
+            {
+                connection.Open();
+                var parm = new DynamicParameters();
+                parm.Add("@Cod_Prod", cod_prod);
+
+                var result = connection.Query(
+                     sql: "SP_TALLAS_VENTA",
+                     param: parm,
+                     commandType: CommandType.StoredProcedure)
+                     .Select(m => m as IDictionary<string, object>)
+                     .Select(n => new Entities.Tallas
+                     {
+                         Talla = n.Single(d => d.Key.Equals("Talla")).Value.Parse<int>(),
+                         Cantidad = n.Single(d => d.Key.Equals("Cantidad")).Value.Parse<int>()
+                     });
+
+                return result;
+            }
+        }
+         
+        public int CrearOferta(int cod_prod, string flag,string usuario)
+        {
+
+            using (var connection = Factory.ConnectionFactory())
+            {
+                connection.Open();
+                var parm = new DynamicParameters();
+                parm.Add("@Cod_Prod", cod_prod);
+                parm.Add("@flag", flag);
+                parm.Add("@Usuario", usuario); 
+                
+               var result = connection.Execute(
+                    sql: "SP_OFERTA_PRODUCTO",
+                    param: parm,
+                    commandType: CommandType.StoredProcedure);
+
+                return result;
+            }
+        }
 
 
     }

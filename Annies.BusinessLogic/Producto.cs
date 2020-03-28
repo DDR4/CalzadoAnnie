@@ -21,10 +21,6 @@ namespace Annies.BusinessLogic
         {
             try
             {
-
-                obj.Operacion.TipoOperacion = "P";
-                obj.Operacion.Opcion = "S";
-
                 var result = repository.GetProducto(obj);
                 return new Response<IEnumerable<Entities.Producto>>(result);
             }
@@ -52,12 +48,6 @@ namespace Annies.BusinessLogic
         {
             try
             {
-                obj.Operacion = new Operacion
-                {
-                    TipoOperacion = "P",
-                    Opcion = "D"
-                };
-
                 var result = repository.DeleteProducto(obj);
                 return new Response<int>(result);
             }
@@ -79,5 +69,45 @@ namespace Annies.BusinessLogic
                 throw new Exception(ex.Message);
             }
         }
+
+        public Response<IEnumerable<Entities.Tallas>> TallasProducto(string cod_prod)
+        {
+            try
+            {
+                var result = repository.TallasProducto(cod_prod);
+                return new Response<IEnumerable<Entities.Tallas>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public Response<IEnumerable<Entities.Tallas>> TallasVenta(string cod_prod)
+        {
+            try
+            {
+                var result = repository.TallasVenta(cod_prod);
+                return new Response<IEnumerable<Entities.Tallas>>(result);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public Response<int> CrearOferta(int cod_prod, string flag,string usuario)
+        {
+            try
+            {
+                var result = repository.CrearOferta(cod_prod, flag, usuario);
+                return new Response<int>(result);
+            }
+            catch (Exception ex)
+            {
+                return new Response<int>(ex);
+            }
+        }
+ 
     }
 }

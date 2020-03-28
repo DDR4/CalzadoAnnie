@@ -20,10 +20,7 @@ namespace Annies.BusinessLogic
         public Response<IEnumerable<Entities.Ventas>> GetVentas(Entities.Ventas obj)
         {
             try
-            {
-                obj.Operacion.TipoOperacion = "V";
-                obj.Operacion.Opcion = "S";
-             
+            {             
                 obj.Producto.Cod_Prod = (obj.Producto.Cod_Prod == 0) ? null : obj.Producto.Cod_Prod;
                 obj.Fecha = (obj.Fecha == 0) ? null : obj.Fecha;
                 var result = repository.GetVentas(obj);                            
