@@ -23,10 +23,10 @@
     var $txtModalMarca = $('#txtModalMarca');
     var $txtModalTalla = $('#txtModalTalla');
     var $txtModalPrecio = $('#txtModalPrecio');
-    var $txtModalStock = $('#txtModalStock');
     var $txtModalCodigoAlmacen = $('#txtModalCodigoAlmacen');
     var $btnSaveProducto = $('#btnSaveProducto');
     var $txtModalTallaVendida = $('#txtModalTallaVendida');
+    var $txtModalCantidad = $('#txtModalCantidad');
 
     var $btnAgregarTalla = $('#btnAgregarTalla');
     var $tblListadoTallas = $('#tblListadoTallas');
@@ -36,6 +36,7 @@
     var $btnGenerarExcel = $('#btnGenerarExcel');
     var $txtFechaDesde = $('#txtFechaDesde');
     var $txtFechaHasta = $('#txtFechaHasta');
+    var $txtModalPrecioMayor = $('#txtModalPrecioMayor');
 
     var Message = {
         ObtenerTipoBusqueda: "Obteniendo los tipos de busqueda, Por favor espere...",
@@ -48,7 +49,9 @@
     }
 
     var dataTallas = { Data: [] };
-
+    var $modalTallas = $('#modalTallas');
+    var $tblTallas = $('#tblTallas');
+    var $tblTallasVenta = $('#tblTallasVenta');
 
     // Constructor
     $(Initialize);
@@ -65,14 +68,13 @@
         GetProducto();
 
         app.Event.ForceNumericOnly($txtModalCodigo);
-        app.Event.Number($txtModalStock);
         app.Event.ForceDecimalOnly($txtModalPrecio);
         app.Event.Number($txtModalTalla);
         app.Event.Number($txtCodigo);
-
+        app.Event.Number($txtModalCantidad);
         app.Event.Blur($txtModalPrecio, "N");
 
-       
+
         $btnGenerarExcel.click($btnGenerarExcel_click);
         $txtFechaDesde.change(ValidarGenerarExcel);
         $txtFechaHasta.change(ValidarGenerarExcel);
@@ -86,7 +88,7 @@
             endDate: "today",
             todayHighlight: true
         });
-               
+
     };
 
     function $cboTipoBusqueda_change() {
@@ -145,15 +147,33 @@
             return false;
         }
 
+        if ($txtModalCantidad.val() == '' || $txtModalCantidad.val() == null) {
+            app.Message.Info("Aviso", "Ingrese la cantidad", "Aceptar", null);
+            return false;
+        }
+
+        var tallas = [];
+        dataTallas.Data.map(function (v, i) {
+            tallas.push(v.Talla);
+        });
+
+        var repetido = tallas.indexOf($txtModalTalla.val());
+        if (repetido != -1) {
+            app.Message.Info("Aviso", "No se puede ingresar la misma talla", "Aceptar", null);
+            return false;
+        }
+
         var obj = {
-            "Talla": $txtModalTalla.val()
+            "Talla": $txtModalTalla.val(),
+            "Cantidad": $txtModalCantidad.val()
         };
 
         dataTallas.Data.push(obj);
 
         LoadTallas(dataTallas);
 
-        $txtModalTalla.val('')
+        $txtModalTalla.val('');
+        $txtModalCantidad.val('');
 
         return false;
 
@@ -167,13 +187,11 @@
         var Marca_Prod = $txtModalMarca.val();
         var Talla_Prod = $txtModalTalla.val();
         var Precio_Prod = $txtModalPrecio.val();
-        var Stock_Prod = $txtModalStock.val();
 
         msg += app.ValidarCampo(Cod_Prod, "• El código.");
         msg += app.ValidarCampo(Marca_Prod, "• La marca.");
         //msg += app.ValidarCampo(Talla_Prod, "• La talla.");
         msg += app.ValidarCampo(Precio_Prod, "• El precio.");
-        msg += app.ValidarCampo(Stock_Prod, "• El stock.");
         msg += app.ValidarCampo($txtModalCodigoAlmacen.val(), "• El código almacén.");
         msg += app.ValidarCampo($cboModalTipoProducto.val(), "• El tipo de producto.");
         if (dataTallas.Data.length == 0) {
@@ -229,22 +247,25 @@
     function InsertUpdateProducto() {
         var tallas = [];
         dataTallas.Data.map(function (v, i) {
-            tallas.push(v.Talla);
+            var objtalla = {
+                "Talla": v.Talla,
+                "CodigoProducto": $txtModalCodigo.val(),
+                "Cantidad": v.Cantidad
+            }
+            tallas.push(objtalla);
         });
-
 
         var obj = {
             "IdProducto": Global.IdProducto,
             "Cod_Prod": $txtModalCodigo.val(),
             "Marca_Prod": $txtModalMarca.val(),
-            "Talla_Prod": tallas.join(),
+            "Tallas_Prod": tallas,
             "Precio_Prod": app.UnformatNumber($txtModalPrecio.val()),
-            "Stock_Prod": $txtModalStock.val(),
+            "Precio_Prod_Mayor": app.UnformatNumber($txtModalPrecioMayor.val()),
             "Codigo_Al": $txtModalCodigoAlmacen.val(),
             "Tipo_Prod": $cboModalTipoProducto.val(),
             "Estado_Prod": $cboModalEstado.val()
         }
-
         var method = "POST";
         var url = "Producto/InsertUpdateProducto";
         var data = obj;
@@ -276,27 +297,17 @@
             { data: "Talla_Prod" },
             { data: "Talla_Vendida_Prod" },
             { data: "Precio_Prod" },
-            { data: "Estado_Prod" },
+            { data: "Precio_Prod_Mayor" },
             { data: "FechaDesde" },
+            { data: "Estado_Prod" },
             { data: "Auditoria.TipoUsuario" },
 
         ];
         var columnDefs = [
             {
-                "targets": [6],
-                "className": "text-right",
+                "targets": [6, 7],
                 'render': function (data, type, full, meta) {
                     return '' + app.FormatNumber(data) + '';
-                }
-            },
-            {
-                "targets": [7],
-                "className": "text-center",
-                'render': function (data, type, full, meta) {
-                    if (data == 1) {
-                        return "Activo";
-                    } else return "Inactivo";
-
                 }
             },
             {
@@ -307,29 +318,47 @@
             },
             {
                 "targets": [9],
+                "className": "text-center",
+                'render': function (data, type, full, meta) {
+                    if (data == 1) {
+                        return "Activo";
+                    } else if (data == 3) return "Oferta";
+                    else return "Inactivo";
+                }
+            },
+            {
+                "targets": [10],
                 "visible": true,
                 "orderable": false,
                 "className": "text-center",
                 'render': function (data, type, full, meta) {
                     if (data == 1) {
+                        var htmlOferta = '';
+                        if (full.Estado_Prod == 3) {
+                            htmlOferta = '<a class="btn btn-default btn-xs" style= "margin-right:0.5em" title="Quitar la Oferta" href="javascript:Producto.CrearOferta(' + meta.row + ',' + "'Q'" + ');"><i class="fa fa-tags" aria-hidden="true"></i></a>';
+                        } else htmlOferta = '<a class="btn btn-default btn-xs" style= "margin-right:0.5em" title="Poner en Oferta" href="javascript:Producto.CrearOferta(' + meta.row + ',' + "'P'" + ');"><i class="fa fa-tag" aria-hidden="true"></i></a>';
+
                         return "<center>" +
-                            '<a class="btn btn-default btn-xs" title="Editar" href="javascript:Producto.EditarProducto(' + meta.row + ');"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>' +
-                            '<a class="btn btn-default btn-xs"  title="Eliminar" href="javascript:Producto.EliminarProducto(' + meta.row + ')"><i class="fa fa-trash" aria-hidden="true"></i></a>' +
+                            htmlOferta +
+                            '<a class="btn btn-default btn-xs" style= "margin-right:0.5em" title="Editar" href="javascript:Producto.EditarProducto(' + meta.row + ');"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>' +
+                            //'<a class="btn btn-default btn-xs" style= "margin-right:0.8em" title="Ver Tallas" href="javascript:Producto.DetalleTalla(' + meta.row + ')"><i class="fa fa-eye" aria-hidden="true"></i></a>' +
+                            '<a class="btn btn-default btn-xs" style= "margin-right:0.5em" title="Eliminar" href="javascript:Producto.EliminarProducto(' + meta.row + ')"><i class="fa fa-trash" aria-hidden="true"></i></a>' +
                             "</center> ";
                     } else {
                         return "";
+                        // "<center>" +
+                        //'<a class="btn btn-default btn-xs" style= "margin-right:0.8em" title="Ver Tallas" href="javascript:Producto.DetalleTalla(' + meta.row + ')"><i class="fa fa-eye" aria-hidden="true"></i></a>' + 
+                        //"</center> ";
                     }
                 }
             },
-          
+
         ];
 
         var buttons = [{
             extend: 'excelHtml5',
             className: 'btn btn-success btn-sm ',
             customizeData: function (data) {
-                //var second = [["d", "e", "f", "f", "f", "f", "f", "f", "f"]];
-                //$.merge(data.body, second)            
 
                 for (var i = 0; i < data.body.length; i++) {
                     for (var j = 0; j < data.body[i].length; j++) {
@@ -342,91 +371,14 @@
 
         }];
 
-  
+
         var filters = {
             pageLength: app.Defaults.TablasPageLength,
-            //lengthChange: true,
-            //lengthMenu: [[10, 25, 50, 2438], [10, 25, 50, "All"]]
         };
 
 
         app.FillDataTableAjaxPaging($tblListadoProductos, url, parms, columns, columnDefs, filters, null, null);
 
-
-        //var method = "POST";
-        //var data = obj;
-        //var fnDoneCallback = function (data) {
-        //    FillTable(data);
-        //};
-        //app.CallAjax(method, url, data, fnDoneCallback, null, null, null);
-    }
-
-    function FillTable(data) {
-
-        var columns = [
-            { data: "Cod_Prod" },
-            { data: "Stock_Prod" },
-            { data: "Codigo_Al" },
-            { data: "Marca_Prod" },
-            { data: "Talla_Prod" },
-            { data: "Talla_Vendida_Prod" },
-            { data: "Precio_Prod" },
-            { data: "Estado_Prod" },
-            { data: "Auditoria.TipoUsuario" }
-        ];
-        var columnDefs = [
-            {
-                "targets": [6],
-                "className": "text-right",
-                'render': function (data, type, full, meta) {
-                    return '' + app.FormatNumber(data) + '';
-                }
-            },
-            {
-                "targets": [7],
-                "className": "text-right",
-                'render': function (data, type, full, meta) {
-                    if (data == 1) {
-                        return "Activo";
-                    } else return "Inactivo";
-
-                }
-            },
-            {
-                "targets": [8],
-                "visible": true,
-                "orderable": false,
-                "className": "text-center",
-                'render': function (data, type, full, meta) {
-                    if (data == 1) {
-                        return "<center>" +
-                            '<a class="btn btn-default btn-xs" title="Editar" href="javascript:Producto.EditarProducto(' + meta.row + ');"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>' +
-                            '<a class="btn btn-default btn-xs"  title="Eliminar" href="javascript:Producto.EliminarProducto(' + meta.row + ')"><i class="fa fa-trash" aria-hidden="true"></i></a>' +
-                            "</center> ";
-                    } else {
-                        return "";
-                    }
-                }
-            }
-        ];
-
-        var buttons = [{
-            extend: 'excelHtml5',
-            className: 'btn btn-success btn-sm ',
-
-            customizeData: function (data) {
-                for (var i = 0; i < data.body.length; i++) {
-                    for (var j = 0; j < data.body[i].length; j++) {
-                        data.body[i][j] = '\u200C' + data.body[i][j];
-                    }
-                }
-            },
-
-        }];
-
-
-
-        app.FillDataTable($tblListadoProductos, data, columns, columnDefs, "#tblListadoProductos", false, null, null, null, null, null, 1);
     }
 
     function EditarProducto(row) {
@@ -439,15 +391,13 @@
         $txtModalMarca.val(data.Marca_Prod);
         $txtModalTallaVendida.val(data.Talla_Vendida_Prod);
         $txtModalPrecio.val(app.FormatNumber(data.Precio_Prod));
-        $txtModalStock.val(data.Stock_Prod);
+        $txtModalPrecioMayor.val(app.FormatNumber(data.Precio_Prod_Mayor));
         $txtModalCodigoAlmacen.val(data.Codigo_Al);
         app.Event.Disabled($txtModalCodigo);
         app.Event.Enable($cboModalEstado);
         $cboModalEstado.val(data.Estado_Prod).trigger('change');
         $cboModalTipoProducto.val(data.Tipo_Prod).trigger('change');
-
-        console.log(data);
-        FillTableTalla(data.Talla_Prod, data.Talla_Vendida_Prod);
+        FillTableTalla(data);
     }
 
     function EliminarProducto(row) {
@@ -455,7 +405,6 @@
             var data = app.GetValueRowCellOfDataTable($tblListadoProductos, row);
 
             var obj = {
-                "IdProducto": data.IdProducto,
                 "Cod_Prod": data.Cod_Prod
             }
 
@@ -470,37 +419,40 @@
         app.Message.Confirm("Aviso", "Esta seguro que desea eliminar el producto?", "Aceptar", "Cancelar", fnAceptarCallback, null);
     }
 
-    function FillTableTalla(Talla_Prod, Talla_Vend) {
+    function FillTableTalla(data) {
         dataTallas = { Data: [] };
 
-        if (Talla_Prod != '' && Talla_Prod != null) {
-            var talla = app.ToSplit(Talla_Prod, ',');
-            var tallaV = app.ToSplit(Talla_Vend, ',');
+        var obj = {
+            "Cod_Prod": data.Cod_Prod
+        }
 
-            //var index = $.inArray(talla, tallaV);
-            //talla.splice(index, 1);
+        var method = "POST";
+        var url = "Producto/TallasProducto";
+        var data = obj;
+        var fnDoneCallback = function (data) {
 
-            $.each(talla, function (index, value) {
+            $.each(data.Data, function (index, value) {
                 var obj = {
-                    "Talla": value
+                    "Talla": value.Talla,
+                    "Cantidad": value.Cantidad
                 };
                 dataTallas.Data.push(obj);
             });
-
+            LoadTallas(dataTallas);
         }
-
-        LoadTallas(dataTallas);
+        app.CallAjax(method, url, data, fnDoneCallback);
     }
 
     function LoadTallas(dataTallas) {
         var columns = [
             { data: "Talla" },
+            { data: "Cantidad" },
             { data: "Talla" }
         ];
         var columnDefs = [
 
             {
-                "targets": [1],
+                "targets": [2],
                 "visible": true,
                 "className": "text-center",
                 'render': function (data, type, full, meta) {
@@ -511,7 +463,11 @@
             }
         ];
 
-        app.FillDataTable($tblListadoTallas, dataTallas, columns, columnDefs, "#tblListadoTallas", false);
+        var filtros = {
+            pageLength: 5
+        };
+
+        app.FillDataTable($tblListadoTallas, dataTallas, columns, columnDefs, "#tblListadoTallas", filtros, null, null, null, null, true);
     }
 
     function EliminarNroTalla(row) {
@@ -519,16 +475,17 @@
 
         var tallas = [];
         dataTallas.Data.map(function (v, i) {
-            tallas.push(v.Talla);
+            tallas.push(v);
         });
 
-        var index = $.inArray(data.Talla, tallas);
+        var index = $.inArray(data, tallas);
         tallas.splice(index, 1);
 
         dataTallas = { Data: [] };
         $.each(tallas, function (index, value) {
             var obj = {
-                "Talla": value
+                "Talla": value.Talla,
+                "Cantidad": value.Cantidad
             };
             dataTallas.Data.push(obj);
         });
@@ -536,7 +493,6 @@
         LoadTallas(dataTallas);
 
     }
-
 
     function $btnGenerarExcel_click() {
         var FechaDesde = app.ConvertDatetimeToInt($txtFechaDesde.val(), '/');
@@ -546,18 +502,18 @@
             GenerarExcel();
         } else if (FechaDesde === "") {
             app.Message.Info("Aviso", "Falta ingresar la Fecha Desde", "Aceptar", null);
-        } 
-       
+        }
+
     }
-    
+
     function GenerarExcel() {
 
         var data = {
             Cod_Prod: $txtCodigo.val(),
             Marca_Prod: $txtMarca.val(),
             Estado_Prod: $cboEstado.val(),
-            FechaDesde : app.ConvertDatetimeToInt($txtFechaDesde.val(), '/'),
-            FechaHasta : app.ConvertDatetimeToInt($txtFechaHasta.val(), '/')     
+            FechaDesde: app.ConvertDatetimeToInt($txtFechaDesde.val(), '/'),
+            FechaHasta: app.ConvertDatetimeToInt($txtFechaHasta.val(), '/')
         }
 
         var fnDoneCallback = function (data) {
@@ -565,25 +521,89 @@
                 app.RedirectTo("Producto/GenerarExcel");
             } else {
                 app.Message.Info("Aviso", "No hay productos con esas fechas", "Aceptar");
-            } 
+            }
         }
         app.CallAjax("POST", "Producto/GetAllProductos", data, fnDoneCallback);
     }
 
     function ValidarGenerarExcel() {
         var FechaDesde = app.ConvertDatetimeToInt($txtFechaDesde.val(), '/');
-        var FechaHasta = app.ConvertDatetimeToInt($txtFechaHasta.val(), '/');     
-        
+        var FechaHasta = app.ConvertDatetimeToInt($txtFechaHasta.val(), '/');
+
         if (FechaDesde > FechaHasta) {
             $txtFechaDesde.val("");
         }
     }
 
+    function DetalleTalla(row) {
+        var data = app.GetValueRowCellOfDataTable($tblListadoProductos, row);
+        $modalTallas.modal();
+        var obj = {
+            "Cod_Prod": data.Cod_Prod
+        }
+
+        var method = "POST";
+        var urlpro = "Producto/TallasProducto";
+        var urlven = "Producto/TallasVenta";
+        var data = obj;
+        var datav = obj;
+        var fnDoneCallback = function (data) {
+            LoadTalla(data, 1);
+        };
+        app.CallAjax(method, urlpro, data, fnDoneCallback, null, null, null);
+
+        var fnDoneCallbackv = function (data) {
+            LoadTalla(data, 2);
+        };
+        app.CallAjax(method, urlven, datav, fnDoneCallbackv, null, null, null);
+
+    }
+
+    function LoadTalla(data, tipo) {
+        var columns = [
+            { data: "Talla" },
+            { data: "Cantidad" }
+        ];
+
+        var filtros = {
+            pageLength: 5
+        };
+        if (tipo == 1) {
+            app.FillDataTable($tblTallas, data, columns, null, "#tblTallas", filtros, null, null, null, null, true);
+        } else {
+            app.FillDataTable($tblTallasVenta, data, columns, null, "#tblTallasVenta", filtros, null, null, null, null, true);
+        }
+    }
+
+    function CrearOferta(row, flag) {
+        var msg = "";
+        if (flag == "Q") {
+            msg = "quitar";
+        } else msg = "poner";
+
+        var fnAceptarCallback = function () {
+            var data = app.GetValueRowCellOfDataTable($tblListadoProductos, row);
+            var url = "Producto/CrearOferta";
+            var method = "POST";
+            var obj = {
+                "Cod_Prod": data.Cod_Prod,
+                "flag": flag
+            };
+            var fnDoneCallback = function (data) {
+                GetProducto();
+            };
+            app.CallAjax(method, url, obj, fnDoneCallback, null, null, null);
+        };
+        app.Message.Confirm("Productos", "¿Esta seguro de " + msg + " la oferta?", "Aceptar", "Cancelar", fnAceptarCallback, null);
+
+    }
 
     return {
         EliminarProducto: EliminarProducto,
         EditarProducto: EditarProducto,
-        EliminarNroTalla: EliminarNroTalla
+        EliminarNroTalla: EliminarNroTalla,
+        DetalleTalla: DetalleTalla,
+        CrearOferta: CrearOferta
     }
 
 
