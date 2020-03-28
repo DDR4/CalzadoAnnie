@@ -8,7 +8,7 @@ body {
     font-size: 14px;
     height: 100%;
     background: #2c486b;
-    background-image: url(../img/bsp_bg2.png);
+    background-image: url(../img/bsp_bg4.jpg);
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-position: center;
@@ -57,9 +57,9 @@ textarea {
     text-align: right;
 }
 
-.bsp-footer footer {
-    margin: 10px auto;
-}
+    .bsp-footer footer {
+        margin: 10px auto;
+    }
 
 /*** Box Login***/
 .bsp-box-login {
@@ -134,11 +134,11 @@ textarea {
     margin-bottom: 0px;
 }
 
-.jumbotron h1 {
-    color: red;
-    font-size: 32px;
-    text-shadow: 4px 4px 2px rgba(224, 224, 224, 1);
-}
+    .jumbotron h1 {
+        color: red;
+        font-size: 32px;
+        text-shadow: 4px 4px 2px rgba(224, 224, 224, 1);
+    }
 
 .table .odd.selected,
 .table .even.selected {
@@ -146,10 +146,10 @@ textarea {
     color: whitesmoke;
 }
 
-.table .odd.selected .btn-sm,
-.table .even.selected .btn-sm {
-    color: whitesmoke;
-}
+    .table .odd.selected .btn-sm,
+    .table .even.selected .btn-sm {
+        color: whitesmoke;
+    }
 
 .table .input-sm {
     height: 22px;
@@ -174,32 +174,32 @@ label.form-control {
     padding: 5px 10px;
 }
 
-.box-header .box-title {
-    font-size: 16px;
-}
+    .box-header .box-title {
+        font-size: 16px;
+    }
 
-.box-header > .box-tools {
-    top: 1px;
-}
+    .box-header > .box-tools {
+        top: 1px;
+    }
 
 .small-box {
     width: auto;
     overflow: hidden;
 }
 
-.small-box p {
-    font-size: 13px;
-}
+    .small-box p {
+        font-size: 13px;
+    }
 
-.small-box h3 {
-    font-size: 16px;
-    white-space: normal;
-}
+    .small-box h3 {
+        font-size: 16px;
+        white-space: normal;
+    }
 
-.small-box .icon {
-    overflow: hidden;
-    font-size: 64px;
-}
+    .small-box .icon {
+        overflow: hidden;
+        font-size: 64px;
+    }
 
 td.details-control:before {
     /*background: url('../img/Details_open.png') no-repeat center center;*/
