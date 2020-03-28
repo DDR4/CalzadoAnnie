@@ -188,6 +188,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ProductoController.cs" />
     <Compile Include="Controllers\VentasController.cs" />
+    <Compile Include="Controllers\VentasMayorController.cs" />
     <Compile Include="Core\Filter\CustomAuthorizeAttribute.cs" />
     <Compile Include="Core\Identity\CustomApplicationUser.cs" />
     <Compile Include="Core\Identity\CustomUserManager.cs" />
@@ -357,6 +358,7 @@
     <Content Include="Views\Shared\_LayoutMinimal.cshtml" />
     <Content Include="Views\Error\AccessDenied.cshtml" />
     <Content Include="Views\Error\Index.cshtml" />
+    <Content Include="Views\VentasMayor\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
