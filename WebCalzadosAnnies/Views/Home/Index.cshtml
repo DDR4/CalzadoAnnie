@@ -1,5 +1,7 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+                /**/
+
+                ViewBag.Title = "Home Page";
 }
 
 
@@ -27,14 +29,29 @@
         <div class="col-lg-3 col-xs-4">
             <div class="small-box bg-green">
                 <div class="inner">
-                    <h3>Ventas</h3>
+                    <h3>Ventas por Menor</h3>
                     <p>Zapatos</p>
                 </div>
                 <div class="icon">
                     <i class="ion ion-bag"></i>
                 </div>
                 <a href="@Url.Action("Index", "Ventas")" class="small-box-footer">
-                    Ir a Ventas
+                    Ir a Ventas por Menor
+                    <i class="fa fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-xs-4">
+            <div class="small-box bg-yellow">
+                <div class="inner">
+                    <h3>Ventas por Mayor</h3>
+                    <p>Zapatos</p>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-shopping-bag"></i>
+                </div>
+                <a href="@Url.Action("Index", "VentasMayor")" class="small-box-footer">
+                    Ir a Ventas por Mayor
                     <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>
