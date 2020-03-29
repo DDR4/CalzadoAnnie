@@ -60,6 +60,7 @@
                                         <option value="0" selected>Todos</option>
                                         <option value="1">Activo</option>
                                         <option value="2">Inactivo</option>
+                                        <option value="3">Oferta</option>
                                     </select>
                                 </div>
                             </div>
@@ -117,16 +118,17 @@
                                 <table id="tblListadoProductos" class="table table-bordered table-striped table-hover table-condensed" style="width:100%;">
                                     <thead>
                                         <tr>
-                                            <th width="10%">C&oacute;digo Producto</th>
-                                            <th width="5%;">Stock</th>
-                                            <th width="10%;">Codigo Almac&eacute;n</th>
-                                            <th width="15%;">Marca</th>
-                                            <th width="15%;">Talla</th>
+                                            <th width="2%;">C&oacute;digo Producto</th>
+                                            <th width="2%;">Stock</th>
+                                            <th width="2%;">Codigo Almac&eacute;n</th>
+                                            <th width="10%;">Marca</th>
+                                            <th width="10%;">Talla</th>
                                             <th width="10%;">Talla Vendida</th>
-                                            <th width="10%;">Precio</th>
-                                            <th width="10%;">Estado</th>
-                                            <th width="8%;">Fecha</th>
-                                            <th width="15%;"></th>
+                                            <th width="2%;">Precio</th>
+                                            <th width="2%;">Precio Mayor</th>
+                                            <th width="5%;">Fecha</th>
+                                            <th width="2%;">Estado</th>
+                                            <th width="8%;"></th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -151,62 +153,64 @@
             <div class="modal-body">
                 <form id="formModal" class="small" onkeypress="return event.keyCode != 13;">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label for="txtModalCodigo">C&oacute;digo Producto</label>
                                 <input class="form-control input-sm" type="text" id="txtModalCodigo" maxlength="20" />
                             </div>
                         </div>
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label for="txtModalMarca">Marca</label>
                                 <input class="form-control input-sm" type="text" id="txtModalMarca" maxlength="250" placeholder="" />
                             </div>
                         </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="txtModalPrecio">Precio Menor</label>
+                                <input class="form-control input-sm" type="text" id="txtModalPrecio" maxlength="50" value="0.00" />
+                            </div>
+                        </div>
                     </div>
 
 
                     <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="txtModalPrecio">Precio</label>
-                                <input class="form-control input-sm" type="text" id="txtModalPrecio" maxlength="50" value="0.00" />
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="txtModalStock">Stock</label>
-                                <input class="form-control input-sm" type="text" id="txtModalStock" maxlength="50" />
-                            </div>
-                        </div>
-                        <div class="col-md-4">
+
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label for="txtModalCodigoAlmacen">C&oacute;digo Almac&eacute;n</label>
                                 <input class="form-control input-sm" type="text" id="txtModalCodigoAlmacen" maxlength="50" />
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row">
-
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label for="cboModalTipoProducto">Tipo de Producto</label>
                                 <select class="form-control" id="cboModalTipoProducto">
                                     <option value="0">Seleccionar</option>
                                     <option value="1">Verano</option>
                                     <option value="2">Invierno</option>
+                                    <option value="3">Primavera</option>
+                                    <option value="4">Otoño</option>
+
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label for="cboModalEstado">Estado</label>
                                 <select class="form-control" id="cboModalEstado">
                                     <option value="0">Seleccionar</option>
                                     <option value="1">Activo</option>
                                     <option value="2">Inactivo</option>
+                                    <option value="3">Oferta</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="txtModalPrecio">Precio Mayor</label>
+                                <input class="form-control input-sm" type="text" id="txtModalPrecioMayor" maxlength="50" value="0.00" />
                             </div>
                         </div>
                     </div>
@@ -218,6 +222,13 @@
                                 <div class="form-group">
                                     <label for="txtModalTalla">Talla</label>
                                     <input class="form-control input-sm" type="text" id="txtModalTalla" maxlength="2" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="txtModalCantidad">Cantidad</label>
+                                    <input class="form-control input-sm" type="text" id="txtModalCantidad" maxlength="3" />
                                 </div>
                             </div>
 
@@ -241,6 +252,7 @@
                                         <thead>
                                             <tr>
                                                 <th width="8%">Nro Talla</th>
+                                                <th width="8%">Cantidades</th>
                                                 <th width="8%"></th>
                                             </tr>
                                         </thead>
@@ -261,6 +273,56 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-danger btn-sm" type="button" id="btnSaveProducto">Guardar</button>
+                <button class="btn btn-default btn-sm" type="button" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalTallas" tabindex="-1" role="dialog" aria-labelledby="titleModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" aria-label="Close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Detalle de Tallas</h4>
+            </div>
+            <div class="modal-body">
+                <form id="formModal" class="small" onkeypress="return event.keyCode != 13;">
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Tallas del producto </h5>
+                                <div class="table-responsive">
+                                    <table id="tblTallas" class="table table-bordered table-striped table-hover table-condensed" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th width="8%">Tallas</th>
+                                                <th width="8%">Cantidades</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Tallas de venta </h5>
+                                <div class="table-responsive">
+                                    <table id="tblTallasVenta" class="table table-bordered table-striped table-hover table-condensed" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th width="8%">Tallas</th>
+                                                <th width="8%">Cantidades</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
                 <button class="btn btn-default btn-sm" type="button" data-dismiss="modal">Cerrar</button>
             </div>
         </div>

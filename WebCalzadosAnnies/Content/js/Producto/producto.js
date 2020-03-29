@@ -341,14 +341,10 @@
                         return "<center>" +
                             htmlOferta +
                             '<a class="btn btn-default btn-xs" style= "margin-right:0.5em" title="Editar" href="javascript:Producto.EditarProducto(' + meta.row + ');"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>' +
-                            //'<a class="btn btn-default btn-xs" style= "margin-right:0.8em" title="Ver Tallas" href="javascript:Producto.DetalleTalla(' + meta.row + ')"><i class="fa fa-eye" aria-hidden="true"></i></a>' +
                             '<a class="btn btn-default btn-xs" style= "margin-right:0.5em" title="Eliminar" href="javascript:Producto.EliminarProducto(' + meta.row + ')"><i class="fa fa-trash" aria-hidden="true"></i></a>' +
                             "</center> ";
                     } else {
                         return "";
-                        // "<center>" +
-                        //'<a class="btn btn-default btn-xs" style= "margin-right:0.8em" title="Ver Tallas" href="javascript:Producto.DetalleTalla(' + meta.row + ')"><i class="fa fa-eye" aria-hidden="true"></i></a>' + 
-                        //"</center> ";
                     }
                 }
             },

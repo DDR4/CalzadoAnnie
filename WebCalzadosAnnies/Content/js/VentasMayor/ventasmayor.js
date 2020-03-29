@@ -149,7 +149,7 @@
         var url = "VentasMayor/GetVentasMayor";
 
         var parms = {
-            Fecha: app.ConvertDatetimeToInt($txtFecha.val(), '/')        
+            Fecha: app.ConvertDatetimeToInt($txtFecha.val(), '/')
         }
 
         var columns = [
@@ -163,9 +163,9 @@
             { data: "Auditoria.TipoUsuario" }
         ];
         var columnDefs = [
-           
+
             {
-                "targets": [2,3,4,5],
+                "targets": [2, 3, 4, 5],
                 "className": "text-right",
                 'render': function (data, type, full, meta) {
                     return '' + app.FormatNumber(data) + '';
@@ -318,7 +318,7 @@
             "Precio_Venta": $txtModalPrecioVenta.val(),
             "Descuento_Venta": $txtModalDescuento.val(),
             "Precio_Final": $txtModalTotal.val(),
-            "Tallas_Venta": TallasSeleccionadas              
+            "Tallas_Venta": TallasSeleccionadas
         }
 
         var method = "POST";
@@ -344,7 +344,7 @@
                 "Precio_Prod_Mayor": value.Precio_Prod_Mayor
             };
             DatosSeleccionados.push(obj);
-        }); 
+        });
         NuevosDatosSeleccionados = [];
         LoadProductos();
     }
@@ -387,16 +387,16 @@
 
         $.each(NuevosDatosSeleccionados, function (key, valueDS) {
             $.each(DatosSeleccionados, function (key, valueNDS) {
-              if (valueNDS.Cod_Prod != valueDS.Cod_Prod) {
-                var obj = {
-                    "Cod_Prod": valueNDS.Cod_Prod,
-                    "Marca_Prod": valueNDS.Marca_Prod,
-                    "Precio_Prod_Mayor": valueNDS.Precio_Prod_Mayor
-                };
-                NuevosDatosSeleccionados.push(obj);
-               }          
-            }); 
-        }); 
+                if (valueNDS.Cod_Prod != valueDS.Cod_Prod) {
+                    var obj = {
+                        "Cod_Prod": valueNDS.Cod_Prod,
+                        "Marca_Prod": valueNDS.Marca_Prod,
+                        "Precio_Prod_Mayor": valueNDS.Precio_Prod_Mayor
+                    };
+                    NuevosDatosSeleccionados.push(obj);
+                }
+            });
+        });
         $tblListadoProductosSeleccionados.DataTable().clear().draw();
         LoadProductosSeleccionados(NuevosDatosSeleccionados);
         EventoSeleccionProducto();
@@ -415,7 +415,7 @@
         } else {
             app.Message.Info("ERROR", "El precio del producto no puede ser mayor al  de venta", null, null);
             $txtModalPrecioVenta.val("");
-        }      
+        }
     }
 
     function $cboModalTalla_change() {
@@ -425,14 +425,14 @@
         var method = "POST";
         var url = "Ventas/TallasProducto";
         var data = obj;
-        var fnDoneCallback = function (data) {           
+        var fnDoneCallback = function (data) {
             $.each(data.Data, function (key, value) {
                 if ($cboModalTalla.val() == value.Talla) {
                     $txtModalCantidadMaxima.val(value.Cantidad);
                 }
             });
         }
-        app.CallAjax(method, url, data, fnDoneCallback);  
+        app.CallAjax(method, url, data, fnDoneCallback);
         $txtModalCantidad.val('');
     }
 
@@ -508,8 +508,8 @@
 
         var data = app.GetValueRowCellOfDataTable($tblListadoProductosSeleccionados, row);
         var ProductosSeleccionadas = [];
-        var fnAceptarCallback = function () {           
-            
+        var fnAceptarCallback = function () {
+
             NuevosDatosSeleccionados.map(function (v, i) {
                 ProductosSeleccionadas.push(v);
             });
@@ -525,7 +525,7 @@
                     "Precio_Prod_Mayor": value.Precio_Prod_Mayor
                 };
                 NuevosDatosSeleccionados.push(obj);
-            });   
+            });
 
             Limpiar_ProductosSeleccionados();
             LoadProductosSeleccionados(NuevosDatosSeleccionados);
@@ -571,36 +571,36 @@
             }
         });
 
-            if (cant_detalle > 0) {
-                app.Message.Confirm("Aviso", "Esta seguro que desea eliminar el producto, se eliminaran las tallas asociadas?", "Aceptar", "Cancelar", fnAceptarCallback, null);
-                return false;
-            }
-            else {
+        if (cant_detalle > 0) {
+            app.Message.Confirm("Aviso", "Esta seguro que desea eliminar el producto, se eliminaran las tallas asociadas?", "Aceptar", "Cancelar", fnAceptarCallback, null);
+            return false;
+        }
+        else {
 
-                NuevosDatosSeleccionados.map(function (v, i) {
-                    ProductosSeleccionadas.push(v);
-                });
+            NuevosDatosSeleccionados.map(function (v, i) {
+                ProductosSeleccionadas.push(v);
+            });
 
-                var index = $.inArray(data, NuevosDatosSeleccionados);
-                ProductosSeleccionadas.splice(index, 1);
+            var index = $.inArray(data, NuevosDatosSeleccionados);
+            ProductosSeleccionadas.splice(index, 1);
 
-                NuevosDatosSeleccionados = [];
-                $.each(ProductosSeleccionadas, function (index, value) {
-                    var obj = {
-                        "Cod_Prod": value.Cod_Prod,
-                        "Marca_Prod": value.Marca_Prod,
-                        "Precio_Prod_Mayor": value.Precio_Prod_Mayor
-                    };
-                    NuevosDatosSeleccionados.push(obj);
-                });
+            NuevosDatosSeleccionados = [];
+            $.each(ProductosSeleccionadas, function (index, value) {
+                var obj = {
+                    "Cod_Prod": value.Cod_Prod,
+                    "Marca_Prod": value.Marca_Prod,
+                    "Precio_Prod_Mayor": value.Precio_Prod_Mayor
+                };
+                NuevosDatosSeleccionados.push(obj);
+            });
 
-                Limpiar_ProductosSeleccionados();
-                LoadProductosSeleccionados(NuevosDatosSeleccionados);
-                EventoSeleccionProducto();
-            }
-       
+            Limpiar_ProductosSeleccionados();
+            LoadProductosSeleccionados(NuevosDatosSeleccionados);
+            EventoSeleccionProducto();
+        }
 
-       
+
+
 
     }
 
@@ -613,7 +613,7 @@
                 { data: "Precio_Prod_Mayor" },
                 { data: "Cod_Prod" }
             ],
-            columnDefs : [
+            columnDefs: [
 
                 {
                     "targets": [3],
@@ -656,10 +656,10 @@
             $txtModalCantidad.val('');
             Limpiar_cboModalTalla();
         });
-    }   
+    }
 
     function Cargar_ComboTallas() {
-         
+
         var obj = {
             "Cod_Prod": $txtModalCodigo.val()
         }
@@ -675,7 +675,7 @@
             });
 
         }
-        app.CallAjax(method, url, data, fnDoneCallback);  
+        app.CallAjax(method, url, data, fnDoneCallback);
 
     }
 
@@ -686,10 +686,10 @@
         if (msj != null) {
             app.Message.Info("Aviso", msj, "Aceptar", null);
             return false;
-        }       
+        }
 
-        var precio_prod = ObtenerPrecioVenta();     
-        
+        var precio_prod = ObtenerPrecioVenta();
+
         var obj = {
             "Cod_Prod": parseInt($txtModalCodigo.val()),
             "Talla": $cboModalTalla.val(),
@@ -700,7 +700,7 @@
         DatosSeleccionadosDetalle.Data.push(obj);
 
         LoadTallasSeleccionadas(DatosSeleccionadosDetalle);
-            
+
         $cboModalTalla.val(-1);
         $txtModalCantidadMaxima.val('');
         $txtModalCantidad.val('');
@@ -737,10 +737,10 @@
             pageLength: 5
         };
 
-        app.FillDataTable($tblListadoTallas, DatosSeleccionadosDetalle, columns, columnDefs, "#tblListadoTallas", filtros, null, null, null, null,true);
+        app.FillDataTable($tblListadoTallas, DatosSeleccionadosDetalle, columns, columnDefs, "#tblListadoTallas", filtros, null, null, null, null, true);
     }
 
-    function EliminarNroTalla(row)   {
+    function EliminarNroTalla(row) {
         var data = app.GetValueRowCellOfDataTable($tblListadoTallas, row);
 
         var TallasSeleccionadas = [];
@@ -806,14 +806,14 @@
                 $txtModalCantidad.val('');
                 return msj;
                 break;
-            } 
+            }
         }
 
         if (parseInt($txtModalCantidad.val()) > parseInt($txtModalCantidadMaxima.val())) {
             msj = "No se puede ingresar una cantidad mayor al stock talla.";
             $txtModalCantidad.val('');
             return msj;
-        }           
+        }
 
     }
 
@@ -855,7 +855,7 @@
 
     function DetalleVenta(row) {
         var data = app.GetValueRowCellOfDataTable($tblListadoVentasMayor, row);
-       
+
         var obj = {
             "Cod_Venta": data.Cod_Venta
         }
@@ -884,7 +884,7 @@
             pageLength: 10
         };
         app.FillDataTable($tblTallasVentaMayor, data, columns, null, "#tblTallasVentaMayor", filtros, null, null, null, null, true);
-    }    
+    }
 
     return {
         EliminarVenta: EliminarVenta,

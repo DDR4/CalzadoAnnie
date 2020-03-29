@@ -10,6 +10,8 @@ using System.Linq;
 using System.Threading;
 using System.Web;
 using System.Web.Mvc;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace WebCalzadosAnnies.Controllers
 {
@@ -68,24 +70,13 @@ namespace WebCalzadosAnnies.Controllers
                 UsuarioCreacion = User.Identity.Name,
                 UsuarioModificacion = User.Identity.Name
             };
-            obj.Operacion = new Operacion
-            {
-                TipoOperacion = "P",
-                Opcion = obj.IdProducto == null ? "I" : "U"
-            };
-            //if (obj.Operacion.Opcion == "I")
-            //{
-            //    if (Session["listado"] != null)
-            //    {
-            //        var data = (List<Annies.Entities.Producto>)Session["listado"];
-            //        var val = data.Where(x => x.Cod_Prod == obj.Cod_Prod);
-            //        if (val.Any())
-            //        {
-            //            var res = new Annies.Common.Response<int>("El codigo ya existe");
-            //            return Json(res);
-            //        }
-            //    }
-            //}
+
+            var tallasxml = obj.Tallas_Prod.Select(i => new XElement("Talla",
+                        new XElement("talla", i.Talla),
+                        new XElement("cod_prod", i.CodigoProducto),
+                        new XElement("cantidad", i.Cantidad)));
+            obj.TallasXml = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), new XElement("Tallas", tallasxml));
+
             var response = bussingLogic.InsertUpdateProducto(obj);
 
             return Json(response);
@@ -95,6 +86,10 @@ namespace WebCalzadosAnnies.Controllers
         public JsonResult DeleteProducto(Annies.Entities.Producto obj)
         {
             var bussingLogic = new Annies.BusinessLogic.Producto();
+            obj.Auditoria = new Annies.Entities.Auditoria
+            {
+                UsuarioModificacion = User.Identity.Name
+            };
             var response = bussingLogic.DeleteProducto(obj);
 
             return Json(response);
@@ -156,7 +151,7 @@ namespace WebCalzadosAnnies.Controllers
 
 
             string[] Cabezeras = {
-                    "Código Producto", "Stock", "Codigo Almacén", "Marca", "Talla" , "Talla Vendida", "Precio" , "Estado","Fecha"
+                    "Código Producto", "Stock", "Codigo Almacén", "Marca", "Talla" , "Talla Vendida", "Precio", "Precio Mayor" , "Estado","Fecha"
                 };
 
             // Se crea la primera fila para las cabceras.
@@ -196,6 +191,7 @@ namespace WebCalzadosAnnies.Controllers
                 AddValue(row, cellnum++, item.Talla_Prod, styleBody); sheet.AutoSizeColumn(cellnum);
                 AddValue(row, cellnum++, item.Talla_Vendida_Prod, styleBody); sheet.AutoSizeColumn(cellnum);
                 AddValue(row, cellnum++, item.Precio_Prod.ToString(), styleBody); sheet.AutoSizeColumn(cellnum);
+                AddValue(row, cellnum++, item.Precio_Prod_Mayor.ToString(), styleBody); sheet.AutoSizeColumn(cellnum);
                 AddValue(row, cellnum++, item.Estado_Prod == 1 ? "Activo" : "Inactivo".ToString(), styleBody); sheet.AutoSizeColumn(cellnum);
                 AddValue(row, cellnum++, item.FechaDesde.ToString().Substring(6, 2) + "/" + item.FechaDesde.ToString().Substring(4, 2) + "/" + item.FechaDesde.ToString().Substring(0, 4), styleBody); sheet.AutoSizeColumn(cellnum);
 
@@ -217,6 +213,34 @@ namespace WebCalzadosAnnies.Controllers
             cell.SetCellValue(value);
             cell.CellStyle = styleBody;
 
+        }
+
+        public JsonResult TallasProducto(string Cod_Prod)
+        {
+            var bussingLogic = new Annies.BusinessLogic.Producto();
+            var response = bussingLogic.TallasProducto(Cod_Prod);
+
+            return Json(response);
+
+        }
+
+        public JsonResult TallasVenta(string Cod_Prod)
+        {
+            var bussingLogic = new Annies.BusinessLogic.Producto();
+            var response = bussingLogic.TallasVenta(Cod_Prod);
+
+            return Json(response);
+
+        }
+
+
+        public JsonResult CrearOferta(int cod_Prod, string flag)
+        {
+            string usuario = User.Identity.Name;
+            var bussingLogic = new Annies.BusinessLogic.Producto();
+            var response = bussingLogic.CrearOferta(cod_Prod, flag, usuario);
+
+            return Json(response);
         }
     }
 }

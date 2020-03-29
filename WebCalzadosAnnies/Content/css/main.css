@@ -252,3 +252,7 @@ tr.shown td.details-control:before {
     font-size: 12px;
     line-height: 1.5;
 }
+
+.fa-tags {
+    color: orange;
+}

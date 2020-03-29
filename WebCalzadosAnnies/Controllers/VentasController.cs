@@ -1,4 +1,5 @@
-﻿using Annies.Entities;
+﻿using Annies.Common;
+using Annies.Entities;
 using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
@@ -44,7 +45,7 @@ namespace WebCalzadosAnnies.Controllers
 
                 var bussingLogic = new Annies.BusinessLogic.Ventas();
                 var response = bussingLogic.GetVentas(obj);
-                
+
                 var Datos = response.Data;
                 int totalRecords = Datos.Any() ? Datos.FirstOrDefault().Operacion.TotalRows : 0;
                 int recFilter = totalRecords;
@@ -56,14 +57,14 @@ namespace WebCalzadosAnnies.Controllers
                     recordsFiltered = recFilter,
                     data = Datos
                 });
-                
+
                 return Json(result);
             }
             catch (Exception ex)
             {
                 return Json(Annies.Common.ConfigurationUtilities.ErrorCatchDataTable(ex));
             }
-        
+
         }
 
         public JsonResult InsertUpdateVentas(Annies.Entities.Ventas obj)
@@ -71,13 +72,7 @@ namespace WebCalzadosAnnies.Controllers
             var bussingLogic = new Annies.BusinessLogic.Ventas();
             obj.Auditoria = new Auditoria
             {
-                UsuarioCreacion = User.Identity.Name,
-                UsuarioModificacion = User.Identity.Name
-            };
-            obj.Operacion = new Operacion
-            {
-                TipoOperacion = "V",
-                Opcion = obj.Cod_Venta == null ? "I" : "U"
+                UsuarioCreacion = User.Identity.Name
             };
             var response = bussingLogic.InsertUpdateVentas(obj);
 
@@ -86,18 +81,14 @@ namespace WebCalzadosAnnies.Controllers
         public JsonResult DeleteVentas(Annies.Entities.Ventas obj)
         {
             var bussingLogic = new Annies.BusinessLogic.Ventas();
-            obj.Operacion = new Operacion
+            obj.Auditoria = new Auditoria
             {
-                TipoOperacion = "V",
-                Opcion = "D"
+                UsuarioModificacion = User.Identity.Name
             };
             var response = bussingLogic.DeleteVentas(obj);
-
             return Json(response);
 
         }
-
-
 
         public JsonResult GetProducto(Annies.Entities.Producto obj)
         {
@@ -112,7 +103,7 @@ namespace WebCalzadosAnnies.Controllers
                 string draw = Request.Form.GetValues("draw")[0];
                 int inicio = Convert.ToInt32(Request.Form.GetValues("start").FirstOrDefault());
                 int fin = Convert.ToInt32(Request.Form.GetValues("length").FirstOrDefault());
-                
+
                 obj.Auditoria = new Auditoria
                 {
                     TipoUsuario = tipoUsuario
@@ -125,7 +116,7 @@ namespace WebCalzadosAnnies.Controllers
 
                 var response = bussingLogic.GetProducto(obj);
                 var Datos = response.Data;
-                int totalRecords = Datos.Any() ?  Datos.FirstOrDefault().Operacion.TotalRows : 0;
+                int totalRecords = Datos.Any() ? Datos.FirstOrDefault().Operacion.TotalRows : 0;
                 int recFilter = totalRecords;
 
                 var result = (new
@@ -135,7 +126,7 @@ namespace WebCalzadosAnnies.Controllers
                     recordsFiltered = recFilter,
                     data = Datos
                 });
-                
+
                 return Json(result);
             }
             catch (Exception ex)
@@ -199,7 +190,7 @@ namespace WebCalzadosAnnies.Controllers
 
 
             string[] Cabezeras = {
-                    "Código Venta", "Código Producto","Marca" ,"Cantidad Venta", "Fecha", "Precio Final" , "Talla Venta"
+                    "Código Venta", "Código Producto","Marca" ,"Cantidad Venta", "Fecha","Precio Venta", "Precio Final" , "Talla Venta"
                 };
 
             // Se crea la primera fila para las cabceras.
@@ -236,7 +227,8 @@ namespace WebCalzadosAnnies.Controllers
                 AddValue(row, cellnum++, item.Producto.Cod_Prod.ToString(), styleBody); sheet.AutoSizeColumn(cellnum);
                 AddValue(row, cellnum++, item.Producto.Marca_Prod.ToString(), styleBody); sheet.AutoSizeColumn(cellnum);
                 AddValue(row, cellnum++, item.Cant_Venta.ToString(), styleBody); sheet.AutoSizeColumn(cellnum);
-                AddValue(row, cellnum++, item.Fecha.ToString().Substring(6,2) +"/"+ item.Fecha.ToString().Substring(4,2) + "/" + item.Fecha.ToString().Substring(0,4), styleBody); sheet.AutoSizeColumn(cellnum);
+                AddValue(row, cellnum++, item.Fecha.ToString().Substring(6, 2) + "/" + item.Fecha.ToString().Substring(4, 2) + "/" + item.Fecha.ToString().Substring(0, 4), styleBody); sheet.AutoSizeColumn(cellnum);
+                AddValue(row, cellnum++, item.Precio_Venta.ToString(), styleBody); sheet.AutoSizeColumn(cellnum);
                 AddValue(row, cellnum++, item.Precio_Final.ToString(), styleBody); sheet.AutoSizeColumn(cellnum);
                 AddValue(row, cellnum++, item.Talla_Venta.ToString(), styleBody); sheet.AutoSizeColumn(cellnum);
             }
@@ -256,6 +248,15 @@ namespace WebCalzadosAnnies.Controllers
             cell = row.CreateCell(cellnum);
             cell.SetCellValue(value);
             cell.CellStyle = styleBody;
+
+        }
+
+        public JsonResult TallasProducto(string Cod_Prod)
+        {
+            var bussingLogic = new Annies.BusinessLogic.Producto();
+            var response = bussingLogic.TallasProducto(Cod_Prod);
+            var result = new Response<IEnumerable<Annies.Entities.Tallas>>(response.Data.Where(x => x.Cantidad > 0));
+            return Json(result);
 
         }
 

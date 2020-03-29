@@ -41,7 +41,7 @@
         };
         var DataTableLengthChange = false;
         var DataTablePageLength = 20;
-        var TablasPageLength = 100;
+        var TablasPageLength = 50;
         // Configuracion general select2
         var Select2AllowClear = true;
         var Select2Style = {
@@ -445,53 +445,30 @@
 
     }
 
-    function FillDataTable(selector, data, columns, columnsDefs, tableName, filtros, rowCallback, drawCallback, indexRow, selectColumn, buttons, paginacion) {
+    function FillDataTable(selector, data, columns, columnsDefs, tableName, filtros, rowCallback, drawCallback, indexRow, buttons, paginacion) {
+
+        var pageLength = !isNullUndefined(filtros) && !isNullUndefined(filtros.pageLength) ? filtros.pageLength : app.Defaults.DataTablePageLength;
         var table;
         if ($.fn.dataTable.isDataTable(tableName)) {
             table = selector.dataTable().api();
         } else {
-            if (filtros) {
-                table = selector.dataTable({
-                    paging: app.Defaults.DataTablePaging,
-                    searching: !app.Defaults.DataTableSearching,
-                    ordering: app.Defaults.DataTableOrdering,
-                    lengthChange: !app.Defaults.DataTableOrdering,
-                    //select: {
-                    //    style: selectColumn == undefined ? app.Defaults.DataTableSelect.Single : app.Defaults.DataTableSelect.Multiple
-                    //},
-                    // SE ESTA AGREGANDO EL SCROLL PARA LA TABLA DE FORMULAS PARTIDAS
-                    scrollY: '50vh',
-                    scrollCollapse: true,
 
-                    order: [],
-                    columns: columns,
-                    columnDefs: columnsDefs,
-                    language: app.Defaults.DataTableLanguage,
-                    rowCallback: rowCallback,
-                    drawCallback: drawCallback,
-                    pageLength: app.Defaults.DataTablePageLength
-                }).api();
-
-            } else {
-                table = selector.dataTable({
-                    paging: paginacion == undefined || paginacion == null ? app.Defaults.DataTablePaging : !app.Defaults.DataTablePaging,
-                    searching: filtros ? app.Defaults.DataTableSearching : !app.Defaults.DataTableSearching,
-                    ordering: app.Defaults.DataTableOrdering,
-                    lengthChange: filtros ? app.Defaults.DataTableOrdering : !app.Defaults.DataTableOrdering,
-                    //select: {
-                    //    style: selectColumn == undefined ? app.Defaults.DataTableSelect.Single : app.Defaults.DataTableSelect.Multiple
-                    //},
-                    order: [],
-                    columns: columns,
-                    columnDefs: columnsDefs,
-                    language: app.Defaults.DataTableLanguage,
-                    rowCallback: rowCallback,
-                    drawCallback: drawCallback,
-                    pageLength: app.Defaults.DataTablePageLength,
-                    dom: 'Bfrtip',
-                    buttons: buttons == undefined || buttons == null ? [] : buttons,
-                }).api();
-            }
+            table = selector.dataTable({
+                paging: paginacion == undefined || paginacion == null ? app.Defaults.DataTablePaging : !app.Defaults.DataTablePaging,
+                searching: false,
+                ordering: app.Defaults.DataTableOrdering,
+                lengthChange: filtros ? app.Defaults.DataTableOrdering : !app.Defaults.DataTableOrdering,
+                order: [],
+                columns: columns,
+                columnDefs: columnsDefs,
+                language: app.Defaults.DataTableLanguage,
+                rowCallback: rowCallback,
+                drawCallback: drawCallback,
+                pageLength: pageLength,
+                dom: 'Bfrtip',
+                buttons: buttons == undefined || buttons == null ? [] : buttons,
+                info: false
+            }).api();
         }
 
         table.clear();
@@ -570,30 +547,30 @@
             },
             "language": app.Defaults.DataTableLanguage,
             "ajax":
-            {
-                "url": u,
-                "dataType": "JSON",
-                "type": "POST",
-                "data": function (d) {
-                    return $.extend({}, d, params);
-                },
-                "dataFilter": function (data) {
-                    try {
-                        var json = jQuery.parseJSON(data);
-                        if (json.error != "" && json.error != undefined) {
-                            var message = "<h4>Se ha producido un error inesperado al procesar su solicitud.</h4>";
-                            message = message + "Descripcion del error: <br />" + json.error;
-                            Error.Show(message);
-                        }
-                        return JSON.stringify(json);
-                    } catch (e) {
+                {
+                    "url": u,
+                    "dataType": "JSON",
+                    "type": "POST",
+                    "data": function (d) {
+                        return $.extend({}, d, params);
+                    },
+                    "dataFilter": function (data) {
+                        try {
+                            var json = jQuery.parseJSON(data);
+                            if (json.error != "" && json.error != undefined) {
+                                var message = "<h4>Se ha producido un error inesperado al procesar su solicitud.</h4>";
+                                message = message + "Descripcion del error: <br />" + json.error;
+                                Error.Show(message);
+                            }
+                            return JSON.stringify(json);
+                        } catch (e) {
 
-                        var error = app.Defaults.datatableError.error = e;
-                        $mainContent.html(data);
-                        return JSON.stringify(error);
+                            var error = app.Defaults.datatableError.error = e;
+                            $mainContent.html(data);
+                            return JSON.stringify(error);
+                        }
                     }
-                }
-            },
+                },
             "columns": columns,
             "columnDefs": columnDefs,
             "rowCallback": rowCallback,
